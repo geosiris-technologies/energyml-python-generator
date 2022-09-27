@@ -4,7 +4,6 @@ on:
   release:
     types: [created]
 
-
 jobs:
   build:
     name: Build distribution
@@ -104,6 +103,4 @@ jobs:
       - name: Upload to PyPI TEST
         run: |
           cd src
-          poetry config repositories.test https://test.pypi.org/legacy/
-          poetry config http-basic.test ${{ secrets.POETRY_PYPI_TOKEN_USERNAME}} ${{ secrets.POETRY_TEST_PYPI_TOKEN_PASSWORD}}
-          poetry publish --repository test
+          poetry publish --username ${{ secrets.POETRY_PYPI_TOKEN_USERNAME}} --password ${{ secrets.POETRY_PYPI_TOKEN_PASSWORD}}

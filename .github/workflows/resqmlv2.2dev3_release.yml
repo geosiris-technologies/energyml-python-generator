@@ -1,9 +1,8 @@
-name: Energyml Package prodml v2.2 pypi-test
+name: Energyml Package Resqml v2.2_dev3 pypi-test
 
 on:
   release:
     types: [created]
-
 
 jobs:
   build:
@@ -21,17 +20,17 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Download COMMON v2.3
-        run : wget http://geosiris.com/wp-content/uploads/2022/09/common_v2.3.zip -P ${{ github.workspace }}
+      - name: Download COMMON v2.2
+        run : wget http://geosiris.com/wp-content/uploads/2022/09/common_v2.2.zip -P ${{ github.workspace }}
   
-      - name: Unzip COMMON v2.3
-        run: 7z x ${GITHUB_WORKSPACE}/common_v2.3.zip -o${{ github.workspace }}/xsd/common/
+      - name: Unzip COMMON v2.2
+        run: 7z x ${GITHUB_WORKSPACE}/common_v2.2.zip -o${{ github.workspace }}/xsd/common/
         
-      - name: Download prodml v2.2
-        run : wget http://geosiris.com/wp-content/uploads/2022/09/prodml_v2.2.zip -P ${{ github.workspace }}
+      - name: Download RESQML v2.2_dev3
+        run : wget http://geosiris.com/wp-content/uploads/2022/09/resqml_v2.2_dev3.zip -P ${{ github.workspace }}
 
-      - name: Unzip prodml v2.2
-        run: 7z x ${GITHUB_WORKSPACE}/prodml_v2.2.zip -o${{ github.workspace }}/xsd/prodml/
+      - name: Unzip RESQML v2.2_dev3
+        run: 7z x ${GITHUB_WORKSPACE}/resqml_v2.2_dev3.zip -o${{ github.workspace }}/xsd/resqml/
 
       - name: Install Poetry
         run: |
@@ -42,14 +41,14 @@ jobs:
       - name: generate
         run: |
           poetry install
-          poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations xsd/prodml/v2.2/xsd_schemas/ 
-          poetry run rename_pkgs -c 2.3 -p 2.2 -s gen -o prodml22py
-          mv prodml22py src/
+          poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations xsd/resqml/v2.2_dev3/xsd_schemas/ 
+          poetry run rename_pkgs -c 2.2 -r 2.2_dev3 -s gen -o resqml22dev3py
+          mv resqml22dev3py src/
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/prodml22py/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/prodml22py/g' README.md
+          sed -i 's/<PROJECT_NAME>/resqml22dev3py/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/resqml22dev3py/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -96,14 +95,12 @@ jobs:
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/prodml22py/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/prodml22py/g' README.md
+          sed -i 's/<PROJECT_NAME>/resqml22dev3py/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/resqml22dev3py/g' README.md
           cp README.md src/
           cp LICENSE src/
 
       - name: Upload to PyPI TEST
         run: |
           cd src
-          poetry config repositories.test https://test.pypi.org/legacy/
-          poetry config http-basic.test ${{ secrets.POETRY_PYPI_TOKEN_USERNAME}} ${{ secrets.POETRY_TEST_PYPI_TOKEN_PASSWORD}}
-          poetry publish --repository test
+          poetry publish --username ${{ secrets.POETRY_PYPI_TOKEN_USERNAME}} --password ${{ secrets.POETRY_PYPI_TOKEN_PASSWORD}}

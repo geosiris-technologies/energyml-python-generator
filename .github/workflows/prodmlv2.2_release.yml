@@ -1,9 +1,8 @@
-sname: Energyml Package witsml v2.0 pypi-test
+name: Energyml Package prodml v2.2 pypi-test
 
 on:
   release:
     types: [created]
-
 
 jobs:
   build:
@@ -21,17 +20,17 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Download COMMON v2.1
-        run : wget http://geosiris.com/wp-content/uploads/2022/09/common_v2.1.zip -P ${{ github.workspace }}
+      - name: Download COMMON v2.3
+        run : wget http://geosiris.com/wp-content/uploads/2022/09/common_v2.3.zip -P ${{ github.workspace }}
   
-      - name: Unzip COMMON v2.1
-        run: 7z x ${GITHUB_WORKSPACE}/common_v2.1.zip -o${{ github.workspace }}/xsd/common/
+      - name: Unzip COMMON v2.3
+        run: 7z x ${GITHUB_WORKSPACE}/common_v2.3.zip -o${{ github.workspace }}/xsd/common/
         
-      - name: Download witsml v2.0
-        run : wget http://geosiris.com/wp-content/uploads/2022/09/witsml_v2.0.zip -P ${{ github.workspace }}
+      - name: Download prodml v2.2
+        run : wget http://geosiris.com/wp-content/uploads/2022/09/prodml_v2.2.zip -P ${{ github.workspace }}
 
-      - name: Unzip witsml v2.0
-        run: 7z x ${GITHUB_WORKSPACE}/witsml_v2.0.zip -o${{ github.workspace }}/xsd/witsml/
+      - name: Unzip prodml v2.2
+        run: 7z x ${GITHUB_WORKSPACE}/prodml_v2.2.zip -o${{ github.workspace }}/xsd/prodml/
 
       - name: Install Poetry
         run: |
@@ -42,14 +41,14 @@ jobs:
       - name: generate
         run: |
           poetry install
-          poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations xsd/witsml/v2.0/xsd_schemas/ 
-          poetry run rename_pkgs -c 2.1 -w 2.0 -s gen -o witsml20py
-          mv witsml20py src/
+          poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations xsd/prodml/v2.2/xsd_schemas/ 
+          poetry run rename_pkgs -c 2.3 -p 2.2 -s gen -o prodml22py
+          mv prodml22py src/
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/witsml20py/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/witsml20py/g' README.md
+          sed -i 's/<PROJECT_NAME>/prodml22py/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/prodml22py/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -96,14 +95,12 @@ jobs:
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/witsml20py/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/witsml20py/g' README.md
+          sed -i 's/<PROJECT_NAME>/prodml22py/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/prodml22py/g' README.md
           cp README.md src/
           cp LICENSE src/
 
       - name: Upload to PyPI TEST
         run: |
           cd src
-          poetry config repositories.test https://test.pypi.org/legacy/
-          poetry config http-basic.test ${{ secrets.POETRY_PYPI_TOKEN_USERNAME}} ${{ secrets.POETRY_TEST_PYPI_TOKEN_PASSWORD}}
-          poetry publish --repository test
+          poetry publish --username ${{ secrets.POETRY_PYPI_TOKEN_USERNAME}} --password ${{ secrets.POETRY_PYPI_TOKEN_PASSWORD}}
