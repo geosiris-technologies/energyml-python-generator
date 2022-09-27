@@ -1,6 +1,9 @@
 name: Energyml Package Resqml v2.0.1 pypi-test
 
-on: [push,pull_request]
+on:
+  release:
+    types: [created]
+
 
 jobs:
   build:

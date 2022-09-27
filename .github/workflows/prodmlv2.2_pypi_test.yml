@@ -1,6 +1,9 @@
 name: Energyml Package prodml v2.2 pypi-test
 
-on: [push,pull_request]
+on:
+  release:
+    types: [created]
+
 
 jobs:
   build:
@@ -45,7 +48,7 @@ jobs:
 
       - name: build
         run: |
-          sed -i 's/<PROJECT_NAME>/name = "energyml-prodml22"/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-prodml22/g' src/pyproject.toml
           cd src
           poetry install
           poetry build
@@ -87,7 +90,7 @@ jobs:
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/name = "energyml-prodml22"/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-prodml22/g' src/pyproject.toml
 
       - name: Upload to PyPI TEST
         run: |

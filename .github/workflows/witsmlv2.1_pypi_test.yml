@@ -1,6 +1,9 @@
 name: Energyml Package witsml v2.1 pypi-test
 
-on: [push,pull_request]
+on:
+  release:
+    types: [created]
+
 
 jobs:
   build:
