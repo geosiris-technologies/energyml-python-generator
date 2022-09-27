@@ -43,14 +43,14 @@ jobs:
           poetry run rename_pkgs -c 2.3 -r 2.2 -s gen -o energyml-resqml22/energyml
           mv energyml-resqml22 src/
 
-      - name: copy readme and license
+      - name: Update toml
         run: |
+          sed -i 's/<PROJECT_NAME>/energyml-resqml22/g' src/pyproject.toml
           cp README.md src/
           cp LICENSE src/
 
       - name: build
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-resqml22/g' src/pyproject.toml
           cd src
           poetry install
           poetry build
@@ -93,6 +93,8 @@ jobs:
       - name: Update toml
         run: |
           sed -i 's/<PROJECT_NAME>/energyml-resqml22/g' src/pyproject.toml
+          cp README.md src/
+          cp LICENSE src/
 
       - name: Upload to PyPI TEST
         run: |

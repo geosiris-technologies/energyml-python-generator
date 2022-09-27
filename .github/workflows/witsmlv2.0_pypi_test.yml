@@ -46,14 +46,14 @@ jobs:
           poetry run rename_pkgs -c 2.1 -w 2.0 -s gen -o energyml-witsml20/energyml
           mv energyml-witsml20 src/
 
-      - name: copy readme and license
+      - name: Update toml
         run: |
+          sed -i 's/<PROJECT_NAME>/energyml-witsml20/g' src/pyproject.toml
           cp README.md src/
           cp LICENSE src/
 
       - name: build
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-witsml20/g' src/pyproject.toml
           cd src
           poetry install
           poetry build
@@ -96,6 +96,8 @@ jobs:
       - name: Update toml
         run: |
           sed -i 's/<PROJECT_NAME>/energyml-witsml20/g' src/pyproject.toml
+          cp README.md src/
+          cp LICENSE src/
 
       - name: Upload to PyPI TEST
         run: |
