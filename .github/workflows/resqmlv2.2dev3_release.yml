@@ -1,4 +1,4 @@
-name: Energyml Package Resqml v2.2_dev3 pypi-test
+name: Energyml Package Resqml v2.2_dev3
 
 on:
   release:
@@ -41,14 +41,13 @@ jobs:
       - name: generate
         run: |
           poetry install
-          poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations xsd/resqml/v2.2_dev3/xsd_schemas/ 
-          poetry run rename_pkgs -c 2.2 -r 2.2_dev3 -s gen -o resqml22dev3py
-          mv resqml22dev3py src/
+          poetry run xsdata generate -ss clusters -p resqml22dev3 --postponed-annotations xsd/resqml/v2.2_dev3/xsd_schemas/ 
+          mv resqml22dev3 src/
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/resqml22dev3py/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/resqml22dev3py/g' README.md
+          sed -i 's/<PROJECT_NAME>/resqml22dev3/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/resqml22dev3/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -95,8 +94,8 @@ jobs:
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/resqml22dev3py/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/resqml22dev3py/g' README.md
+          sed -i 's/<PROJECT_NAME>/resqml22dev3/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/resqml22dev3/g' README.md
           cp README.md src/
           cp LICENSE src/
 

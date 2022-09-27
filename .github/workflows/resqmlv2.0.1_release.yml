@@ -1,4 +1,4 @@
-name: Energyml Package Resqml v2.0.1 pypi-test
+name: Energyml Package Resqml v2.0.1
 
 on:
   release:
@@ -41,14 +41,13 @@ jobs:
       - name: generate
         run: |
           poetry install
-          poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations xsd/resqml/v2.0.1/xsd_schemas/ 
-          poetry run rename_pkgs -c 2.0 -r 2.0.1 -s gen -o resqml201py
-          mv resqml201py src/
+          poetry run xsdata generate -ss clusters -p resqml201 --postponed-annotations xsd/resqml/v2.0.1/xsd_schemas/ 
+          mv resqml201 src/
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/resqml201py/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/resqml201py/g' README.md
+          sed -i 's/<PROJECT_NAME>/resqml201/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/resqml201/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -95,8 +94,8 @@ jobs:
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/resqml201py/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/resqml201py/g' README.md
+          sed -i 's/<PROJECT_NAME>/resqml201/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/resqml201/g' README.md
           cp README.md src/
           cp LICENSE src/
 

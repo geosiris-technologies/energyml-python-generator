@@ -1,4 +1,4 @@
-name: Energyml Package witsml v2.1 pypi-test
+name: Energyml Package witsml v2.1
 
 on:
   release:
@@ -41,8 +41,7 @@ jobs:
       - name: generate
         run: |
           poetry install
-          poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations xsd/witsml/v2.1/xsd_schemas/ 
-          poetry run rename_pkgs -c 2.3 -w 2.1 -s gen -o witsml21
+          poetry run xsdata generate -ss clusters -p witsml21 --postponed-annotations xsd/witsml/v2.1/xsd_schemas/ 
           mv witsml21 src/
 
       - name: Update toml

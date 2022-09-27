@@ -1,4 +1,4 @@
-name: Energyml Package prodml v2.2 pypi-test
+name: Energyml Package prodml v2.2
 
 on:
   release:
@@ -41,14 +41,13 @@ jobs:
       - name: generate
         run: |
           poetry install
-          poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations xsd/prodml/v2.2/xsd_schemas/ 
-          poetry run rename_pkgs -c 2.3 -p 2.2 -s gen -o prodml22py
-          mv prodml22py src/
+          poetry run xsdata generate -ss clusters -p prodml22 --postponed-annotations xsd/prodml/v2.2/xsd_schemas/ 
+          mv prodml22 src/
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/prodml22py/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/prodml22py/g' README.md
+          sed -i 's/<PROJECT_NAME>/prodml22/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/prodml22/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -95,8 +94,8 @@ jobs:
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/prodml22py/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/prodml22py/g' README.md
+          sed -i 's/<PROJECT_NAME>/prodml22/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/prodml22/g' README.md
           cp README.md src/
           cp LICENSE src/
 
