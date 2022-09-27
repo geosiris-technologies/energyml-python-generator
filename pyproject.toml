@@ -1,0 +1,33 @@
+[build-system]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "energyml-python-generator"
+version = "1.0.0" # Set at build time
+description = "Energyml types "
+authors = [
+    "Valentin Gauthier <valentin.gauthier@geosiris.com>"
+]
+maintainers = [
+    "Lionel Untereiner <lionel.untereiner@geosiris.com>", 
+    "Valentin Gauthier <valentin.gauthier@geosiris.com>"
+]
+license = "Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/geosiris-technologies/energyml-python-generator"
+homepage = "http://www.geosiris.com"
+classifiers = [ ]
+keywords = ["energyml", "resqml", "witsml", "prodml"]
+packages = [
+    { include = "energyml-python-generator" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+coverage = {extras = ["toml"], version = "^6.2"}
+xsdata = {version = "^22.9", extras = ["cli"]}
+
+
+[tool.poetry.scripts]
+rename_pkgs = "energyml-python-generator.main:rename_pkgs"
