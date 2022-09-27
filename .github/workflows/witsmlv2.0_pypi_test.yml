@@ -47,6 +47,7 @@ jobs:
           mv energyml-witsml20 src/
 
       - name: copy readme and license
+        run: |
           cp README.md src/
           cp LICENSE src/
 

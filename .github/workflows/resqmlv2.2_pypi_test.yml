@@ -44,6 +44,7 @@ jobs:
           mv energyml-resqml22 src/
 
       - name: copy readme and license
+        run: |
           cp README.md src/
           cp LICENSE src/
 
