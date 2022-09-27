@@ -1,4 +1,4 @@
-sname: Energyml Package witsml v2.0
+name: Energyml Package witsml v2.0
 
 on:
   release:
