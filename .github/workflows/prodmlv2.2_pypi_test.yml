@@ -49,6 +49,7 @@ jobs:
       - name: Update toml
         run: |
           sed -i 's/<PROJECT_NAME>/energyml-prodml22/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-prodml22/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -96,6 +97,7 @@ jobs:
       - name: Update toml
         run: |
           sed -i 's/<PROJECT_NAME>/energyml-prodml22/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-prodml22/g' README.md
           cp README.md src/
           cp LICENSE src/
 

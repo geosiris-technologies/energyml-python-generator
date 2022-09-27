@@ -36,9 +36,9 @@ classifiers = [
     "Typing :: Typed",
 ]
 keywords = ["energyml", "resqml", "witsml", "prodml"]
-packages = [
-    { include = "<PROJECT_NAME>" },
-]
+# packages = [
+    # { include = "<PROJECT_NAME>" },
+# ]
 
 [tool.poetry.dependencies]
 python = "^3.9"

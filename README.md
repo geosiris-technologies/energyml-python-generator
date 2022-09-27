@@ -18,10 +18,10 @@ Installation
 Energyml-types can be installed with pip : 
 
 ```console
-pip install energyml-types
+pip install <PROJECT_NAME>
 ```
 
 or with poetry: 
 ```console
-poetry add energyml-types
+poetry add <PROJECT_NAME>
 ```
