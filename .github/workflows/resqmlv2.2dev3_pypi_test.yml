@@ -95,7 +95,7 @@ jobs:
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/name = "energyml-resqml22dev3"/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-resqml22dev3/g' src/pyproject.toml
 
       - name: Upload to PyPI TEST
         run: |
