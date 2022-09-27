@@ -75,7 +75,7 @@ def _rename_pkgs(v_common: str, v_resqml: str, v_witsml: str, v_prodml: str, src
                     if m is not None:
                         # print("old pkg", m.group('oldPkg'))
                         for pkg in dict_version:
-                            file_content = re.sub(rf"{m.group('oldPkg')}{pkg}(v2)?", f"energyml.{pkg}{dict_version[pkg]}", file_content)
+                            file_content = re.sub(rf"{m.group('oldPkg')}{pkg}(v2)?", f"{new_pkg_prefix}.{pkg}{dict_version[pkg]}", file_content)
 
                 file_content = re.sub(pattern_opc_with_src, new_pkg_import_prefix, file_content)
                 file_content = re.sub(rf'({src_folder}.)?gen.xml.lang_value', rf'{new_pkg_import_prefix}.xml.lang_value', file_content)

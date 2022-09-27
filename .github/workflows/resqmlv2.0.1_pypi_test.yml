@@ -43,13 +43,13 @@ jobs:
         run: |
           poetry install
           poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations xsd/resqml/v2.0.1/xsd_schemas/ 
-          poetry run rename_pkgs -c 2.0 -r 2.0.1 -s gen -o energyml-resqml201/energyml
-          mv energyml-resqml201 src/
+          poetry run rename_pkgs -c 2.0 -r 2.0.1 -s gen -o resqml201py
+          mv resqml201py src/
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-resqml201/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-resqml201/g' README.md
+          sed -i 's/<PROJECT_NAME>/resqml201py/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/resqml201py/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -96,8 +96,8 @@ jobs:
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-resqml201/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-resqml201/g' README.md
+          sed -i 's/<PROJECT_NAME>/resqml201py/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/resqml201py/g' README.md
           cp README.md src/
           cp LICENSE src/
 

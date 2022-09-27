@@ -43,13 +43,13 @@ jobs:
         run: |
           poetry install
           poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations xsd/witsml/v2.1/xsd_schemas/ 
-          poetry run rename_pkgs -c 2.3 -w 2.1 -s gen -o energyml-witsml21/energyml
-          mv energyml-witsml21 src/
+          poetry run rename_pkgs -c 2.3 -w 2.1 -s gen -o witsml21
+          mv witsml21 src/
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-witsml21/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-witsml21/g' README.md
+          sed -i 's/<PROJECT_NAME>/witsml21/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/witsml21/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -96,8 +96,8 @@ jobs:
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-witsml21/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-witsml21/g' README.md
+          sed -i 's/<PROJECT_NAME>/witsml21/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/witsml21/g' README.md
           cp README.md src/
           cp LICENSE src/
 

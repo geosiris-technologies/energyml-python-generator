@@ -34,13 +34,13 @@ jobs:
         run: |
           poetry install
           poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations xsd/energyml/opc 
-          poetry run rename_pkgs -s gen -o energyml-opc/energyml
-          mv energyml-opc src/
+          poetry run rename_pkgs -s gen -o opcpy
+          mv opcpy src/
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-opc/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-opc/g' README.md
+          sed -i 's/<PROJECT_NAME>/opcpy/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/opcpy/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -87,8 +87,8 @@ jobs:
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-opc/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-opc/g' README.md
+          sed -i 's/<PROJECT_NAME>/opcpy/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/opcpy/g' README.md
           cp README.md src/
           cp LICENSE src/
 
