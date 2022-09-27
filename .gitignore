@@ -1,0 +1,48 @@
+# IDE settings
+.idea
+.vscode
+*.sublime-project
+*.sublime-workspace
+
+# Checkpoints
+.ipynb_checkpoints
+__pycache__/
+.pyc
+*.pyo
+.DS_Store
+
+# Unit tests
+pytest.xml
+.pytest_cache
+.coverage
+htmlcov/
+
+# Built Documentation
+docs/_build
+docs/_autosummary
+docs/html
+
+# Build artifacts
+build
+dist
+*.egg-info
+venv/
+
+# Dynamically-generated version
+resqpy/version.py
+
+# XSD files
+resqpy/olio/data/*.xml
+resqpy/olio/data/*.xsd
+
+# Dask
+dask-worker-space
+
+# Example for local test
+example/
+utils/
+
+# Other files
+requirements.txt
+doc/
+sample/
