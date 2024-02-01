@@ -26,7 +26,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.9"
 coverage = {extras = ["toml"], version = "^6.2"}
-xsdata = {version = "^22.9", extras = ["cli"]}
+xsdata = {version = "^24.0", extras = ["cli", "lxml"]}
 
 
 [tool.poetry.scripts]
