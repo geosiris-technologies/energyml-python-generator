@@ -32,12 +32,12 @@ jobs:
           echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.9'
 
@@ -70,7 +70,7 @@ jobs:
           poetry build
 
       - name: Save build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: dist-artifact-${{ env.PKG_VERSION_UNDERSCORE }}
           path: src/dist/
@@ -100,18 +100,18 @@ jobs:
           echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.9'
 
       # Retrieve the code and GIT history so that poetry-dynamic-versioning knows which version to upload
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Get build artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: dist-artifact-${{ env.PKG_VERSION_UNDERSCORE }}
           path: src/dist/
@@ -124,6 +124,6 @@ jobs:
       - name: Upload to PyPI TEST
         run: |
           cd src
-          poetry config repositories.pypi https://test.pypi.org/legacy/
-          poetry config ${{ secrets.POETRY_PYPI_TEST_TOKEN_NAME }}.pypi ${{ secrets.POETRY_PYPI_TEST_TOKEN_VALUE }}
-          poetry publish --repository pypi
+          poetry config repositories.test-pypi https://test.pypi.org/legacy/
+          poetry config pypi-token.test-pypi ${{ secrets.POETRY_PYPI_TEST_TOKEN_VALUE }}
+          poetry publish --repository test-pypi
