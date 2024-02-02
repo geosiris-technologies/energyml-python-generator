@@ -92,12 +92,12 @@ jobs:
     steps:
       - name: Compute version env
         run: |
-          export PKG_VERSION=`echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g'`
-          export PKG_VERSION_UNDERSCORE=`echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\.//g'`
+          export PKG_VERSION="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g')"
+          export PKG_VERSION_UNDERSCORE="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
           
           # export variable to github env          
-          echo "PKG_VERSION=${{ env.PKG_VERSION }}" >> $GITHUB_ENV
-          echo "PKG_VERSION_UNDERSCORE=${{ env.PKG_VERSION_UNDERSCORE }}" >> $GITHUB_ENV
+          echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+          echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v2
