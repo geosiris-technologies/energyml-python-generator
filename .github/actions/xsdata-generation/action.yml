@@ -41,18 +41,18 @@ runs:
     - name: Compute version env
       shell: bash
       run: |
-        export COMMON_VERSION=`echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g'`
-        export COMMON_VERSION_UNDERSCORE=`echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\.//g'`
+        export PKG_VERSION=`echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g'`
+        export PKG_VERSION_UNDERSCORE=`echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\.//g'`
         
         # export variable to github env          
-        echo "COMMON_VERSION=$COMMON_VERSION" >> $GITHUB_ENV
-        echo "COMMON_VERSION_UNDERSCORE=$COMMON_VERSION_UNDERSCORE" >> $GITHUB_ENV
+        echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+        echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
 
-    - name: Download ${{ inputs.version-common }} v2.3
+    - name: Download ${{ inputs.pkg-name }} xsd zip ${{ inputs.pkg-name }}
       shell: bash
       run : wget ${{ inputs.xsd-url }} -P ${{ github.workspace }}
 
-    - name: Unzip ${{ inputs.version-common }} v2.3
+    - name: Unzip ${{ inputs.pkg-name }} xsd zip ${{ inputs.pkg-name }}
       shell: bash
       run: 7z x ${{ github.workspace }}/${{ inputs.pkg-name }}*.zip -o${{ github.workspace }}/xsd/${{ inputs.pkg-name }}/
 
@@ -86,13 +86,15 @@ runs:
         }
                 
         for f in $(ls energyml); do
-          if folder_match_pkg common $f;
-          then echo "$f true";
-          else echo "$f false";
+          if folder_match_pkg ${{ inputs.pkg-name }} $f;
+          then echo "$f kept";
+          else 
+            echo "removing $f";
+            rm -rf $f;
           fi
         done
         
-        mv energyml src/
+        mv energyml src/energyml-${{ inputs.pkg-name }}{{ env.PKG_VERSION_UNDERSCORE }}
 
     - name: Cleaning
       shell: bash

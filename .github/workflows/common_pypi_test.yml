@@ -127,6 +127,7 @@ jobs:
           sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.COMMON_VERSION_UNDERSCORE }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
+          ls -l src
 
       - name: Upload to PyPI TEST
         run: |
