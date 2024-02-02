@@ -36,8 +36,6 @@ inputs:
   download-only:
     description: 'stops the process after the zip download and extract, the generation will not be done'
     default: 'false'
-    type: boolean
-
 
 runs:
   using: "composite"

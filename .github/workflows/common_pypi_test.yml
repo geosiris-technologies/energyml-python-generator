@@ -56,10 +56,12 @@ jobs:
       - name: Update toml
         run: |
           sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
           sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
           sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
+          ls -l src
 
       - name: build
         run: |
@@ -114,21 +116,20 @@ jobs:
           name: dist-artifact-${{ env.PKG_VERSION_UNDERSCORE }}
           path: src/dist/
 
-      - name: Install Poetry
-        run: |
-          python -m pip install --upgrade pip
-          pip install poetry
-          pip install poetry-dynamic-versioning
+      - name: Install poetry
+        uses: ./.github/actions/prepare-poetry
+        with:
+          python-version: 3.9
 
-      - name: Update toml
-        run: |
-          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
-          sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
-          sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
-          cp README.md src/
-          cp LICENSE src/
-          ls -l src
+#      - name: Update toml
+#        run: |
+#          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
+#          sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
+#          sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
+#          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
+#          cp README.md src/
+#          cp LICENSE src/
+#          ls -l src
 
       - name: Upload to PyPI TEST
         run: |
