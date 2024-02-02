@@ -35,7 +35,7 @@ inputs:
 
   download-only:
     description: 'stops the process after the zip download and extract, the generation will not be done'
-    default: false
+    default: 'false'
     type: boolean
 
 
@@ -62,13 +62,13 @@ runs:
       run: 7z x ${{ github.workspace }}/${{ inputs.pkg-name }}*.zip -o${{ github.workspace }}/xsd/${{ inputs.pkg-name }}/
 
     - name: Generate
-      if: !${{ inputs.download-only }}
+      if: ${{ inputs.download-only == 'false' }}
       shell: bash
       run: |
         poetry run xsdata generate -ss namespaces -p gen --postponed-annotations xsd/${{ inputs.pkg-name }}/*/xsd_schemas/
 
     - name: Renaming
-      if: !${{ inputs.download-only }}
+      if: ${{ inputs.download-only == 'false' }}
       shell: bash
       run: |
         export ARGS_VERSION=`[ -n "${{ inputs.version-common }}" ] && echo '$ARGS_VERSION --common ${{ inputs.version-common }}'`
@@ -79,7 +79,7 @@ runs:
         poetry run rename_pkgs $ARGS_VERSION --src gen -o energyml
 
     - name: Move only the appropriate module in src folder
-      if: !${{ inputs.download-only }}
+      if: ${{ inputs.download-only == 'false' }}
       shell: bash
       run: |
         function folder_match_pkg() {
@@ -107,7 +107,7 @@ runs:
         echo "SRC_CONTENT=$(echo \"$(ls -R src)\")" >> $GITHUB_ENV
 
     - name: Cleaning
-      if: ! ${{ inputs.download-only }}
+      if: ${{ inputs.download-only == 'false' }}
       shell: bash
       run: rm -rf gen
   
