@@ -23,17 +23,14 @@ inputs:
 
   version-resqml:
     description: 'version of the resqml package (if used for the generation)'
-    required: true
     default: ""
 
   version-witsml:
     description: 'version of the witsml package (if used for the generation)'
-    required: true
     default: ""
 
   version-prodml:
     description: 'version of the prodml package (if used for the generation)'
-    required: true
     default: ""
 
 
