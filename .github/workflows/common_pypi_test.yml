@@ -123,8 +123,8 @@ jobs:
 
       - name: Upload to PyPI TEST
         run: |
+          echo "SRC_CONTENT=$(echo \"$(ls -R src)\")" >> $GITHUB_ENV
           cd src
-          echo "SRC_CONTENT=$(echo \"$(ls -R .)\")" >> $GITHUB_ENV
           poetry config repositories.test-pypi https://test.pypi.org/legacy/
           poetry config pypi-token.test-pypi ${{ secrets.POETRY_PYPI_TEST_TOKEN_VALUE }}
           poetry publish --repository test-pypi
