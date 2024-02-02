@@ -25,7 +25,7 @@ jobs:
       - name: Compute version env
         run: |
           export COMMON_VERSION=`echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g'`
-          export COMMON_VERSION_UNDERSCORE=`echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\.//g'`
+          export COMMON_VERSION_UNDERSCORE=`echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g'`
           
           # export variable to github env          
           echo "COMMON_VERSION=$COMMON_VERSION" >> $GITHUB_ENV
