@@ -11,11 +11,11 @@ import sys
 PATTERN = r"(from|import)\s+(?P<oldPkg>((?:(?!common|resqml|witsml|prodml))\w+\.)+)\.?(?P<pkg>common|resqml|witsml|prodml)v2\W"
 
 
-def specific_modification(file_name: str, root_module: str, dict_version: dict, file_content):
+def specific_modification(file_name: str, root_module: str, dict_version: dict, file_content, file_module_or_dir_path: str):
     print(f"file_name : {file_name} root_module : {root_module}")
     if file_name.lower().startswith("gmd"):
         return re.sub(pattern=rf'(?P<firstImport>^(from|import)\s+{root_module})',
-                      repl=f"from {get_pkg(file_name, root_module, dict_version)}.gsr import ScCrsPropertyType\n\g<firstImport>",
+                      repl=f"from {get_pkg(file_name, root_module, dict_version, file_module_or_dir_path)}.gsr import ScCrsPropertyType\n\g<firstImport>",
                       string=file_content,
                       flags=re.MULTILINE,
                       count=1)
@@ -119,7 +119,7 @@ def  _rename_pkgs(v_common: str,
                         print(f"ERR in {file}:\n\t{e}")
 
             # Bugfix after xsdata generation
-            file_content = specific_modification(file, new_pkg_import_prefix, dict_version, file_content)
+            file_content = specific_modification(file, new_pkg_import_prefix, dict_version, file_content, root_path)
 
             with open(root + "/" + file, "w") as f:
                 f.write(file_content)
