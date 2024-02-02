@@ -28,8 +28,8 @@ jobs:
           export PKG_VERSION_UNDERSCORE="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
           
           # export variable to github env          
-          echo "PKG_VERSION=\"$PKG_VERSION\"" >> $GITHUB_ENV
-          echo "PKG_VERSION_UNDERSCORE=\"$PKG_VERSION_UNDERSCORE\"" >> $GITHUB_ENV
+          echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+          echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -123,6 +123,7 @@ jobs:
       - name: Update toml
         run: |
           sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
           sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
           sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
           cp README.md src/
