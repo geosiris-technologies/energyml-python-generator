@@ -22,7 +22,7 @@ def specific_modification(file_name: str, root_module: str, dict_version: dict, 
     return file_content
 
 
-def get_pkg(file_name: str, root_module: str, dict_version: dict):
+def get_pkg(file_name: str, root_module: str, dict_version: dict, file_module_or_dir_path: str):
     f""" 
         return a pkg name like resqml.v20.{file_name}
         dict_version is a dict associating a pkg to its version
@@ -33,6 +33,10 @@ def get_pkg(file_name: str, root_module: str, dict_version: dict):
     for pkg in ["resqml", "witsml", "prodml"]:
         if re.match(pkg, file_name) is not None:
             return f'{root_module}.{pkg}.v{dict_version.get(pkg, "20")}'
+
+    # OPC
+    if "openxmlformats" in file_module_or_dir_path or "purl" in file_module_or_dir_path or "lang_value" in file_name:
+        return f'{root_module}.opc'
 
     return f'{root_module}.eml.v{dict_version.get("eml", dict_version.get("common", "20"))}'
 
@@ -75,33 +79,39 @@ def  _rename_pkgs(v_common: str,
 
     print(f"BEGIN {src_folder}")
 
-    module_names = []
+    file_to_module = {}
 
     for root, dirs, files in os.walk(src_folder):
         root_path = root.replace("\\", "/")
         for file in files:
             print(f" ==> {root_path}/--{file}")
             if file.endswith(".py") and not file.endswith("__init__.py"):
-                file_folder_path = get_pkg(file, new_pkg_import_prefix, dict_version).replace('.', '/')
+                file_folder_path = get_pkg(
+                    file_name=file,
+                    root_module=new_pkg_import_prefix,
+                    dict_version=dict_version,
+                    file_module_or_dir_path=root_path
+                ).replace('.', '/')
                 try:
                     os.makedirs(file_folder_path)
                 except OSError as error:
                     pass
-                module_names.append(file[:-3])
+                file_to_module[file[:-3]] = file_folder_path.replace("/", ".")
                 shutil.copy(root_path + "/" + file, f"{file_folder_path}/{file}")
 
     for root, dirs, files in os.walk(new_pkg_prefix):
+        root_path = root.replace("\\", "/")
         for file in files:
             with open(root + "/" + file, "r") as f:
                 file_content = f.read()
 
             if file_content is not None:
-                for m_name in module_names:
-                    # print("Searching pattern ", rf'(?P<prefix>(^|\n)(from|import)\s+)(\w+\.)*{m_name} in file {file}')
+                for f_name in file_to_module:
                     try:
                         file_content = re.sub(
-                            pattern=rf'(?P<prefix>^(from|import)\s+)(\w+\.)*{m_name}',
-                            repl=rf"\g<prefix>{get_pkg(m_name, new_pkg_import_prefix, dict_version)}.{m_name}",
+                            pattern=rf'(?P<prefix>^(from|import)\s+)(\w+\.)*{f_name}',
+                            # repl=rf"\g<prefix>{get_pkg(m_name, new_pkg_import_prefix, dict_version)}.{m_name}",
+                            repl=rf"\g<prefix>{file_to_module[f_name]}.{f_name}",
                             string=file_content,
                             flags=re.MULTILINE
                         )
@@ -289,3 +299,6 @@ if __name__ == "__main__":
 
 # poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations .\sample\xsd\prodml\v2.2\xsd_schemas\
 # poetry run rename_pkgs --common 2.3 --prodml 2.2 --src gen -o energyml.v22
+
+
+# poetry run xsdata generate -ss namespaces -p gen --postponed-annotations .\sample\xsd\opc\

@@ -14,12 +14,12 @@ inputs:
     required: true
   
   pkg-name:
-    description: 'name of the package to generate (common|resqml|witsml|prodml)'
+    description: 'name of the package to generate (common|resqml|witsml|prodml|opc)'
     required: true
 
   version-common:
     description: 'version of the common package'
-    required: true
+    default: ""
 
   version-resqml:
     description: 'version of the resqml package (if used for the generation)'
@@ -36,6 +36,10 @@ inputs:
   download-only:
     description: 'stops the process after the zip download and extract, the generation will not be done'
     default: 'false'
+
+  generation-type:
+    description: 'xsdata generation type'
+    default: 'namespaces'
 
 runs:
   using: "composite"
@@ -63,7 +67,7 @@ runs:
       if: ${{ inputs.download-only == 'false' }}
       shell: bash
       run: |
-        poetry run xsdata generate -ss namespaces -p gen --postponed-annotations xsd/${{ inputs.pkg-name }}/*/xsd_schemas/
+        poetry run xsdata generate -ss ${{ inputs.generation-type }} -p gen --postponed-annotations xsd/${{ inputs.pkg-name }}/*/xsd_schemas/
 
     - name: Renaming
       if: ${{ inputs.download-only == 'false' }}
