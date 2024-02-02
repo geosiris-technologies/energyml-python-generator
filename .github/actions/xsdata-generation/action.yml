@@ -58,7 +58,6 @@ runs:
 
     - name: Generate
       run: |
-        poetry install
         poetry run xsdata generate -ss namespaces -p gen --postponed-annotations xsd/${{ inputs.pkg-name }}/*/xsd_schemas/
 
     - name: Renaming
