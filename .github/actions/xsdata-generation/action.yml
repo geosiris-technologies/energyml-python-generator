@@ -85,8 +85,8 @@ runs:
             fi
         }
                 
-        for f in $(ls energyml); do; 
-          if folder_match_pkg ${{ inputs.pkg-name }} $f;
+        for f in $(ls energyml); do
+          if folder_match_pkg common $f;
           then echo "$f true";
           else echo "$f false";
           fi
