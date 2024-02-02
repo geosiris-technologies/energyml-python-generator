@@ -26,6 +26,10 @@ jobs:
         run: |
           export COMMON_VERSION=`echo {{ $matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g'`
           export COMMON_VERSION_UNDERSCORE=`echo {{ $matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\.//g'`
+          
+          # export variable to github env          
+          echo "COMMON_VERSION=$COMMON_VERSION" >> $GITHUB_ENV
+          echo "COMMON_VERSION_UNDERSCORE=$COMMON_VERSION_UNDERSCORE" >> $GITHUB_ENV
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -53,14 +57,14 @@ jobs:
         run: |
           poetry install
           poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations xsd/common/*/xsd_schemas/
-          poetry run rename_pkgs --common $COMMON_VERSION --src gen -o energyml
+          poetry run rename_pkgs --common ${{ env.COMMON_VERSION }} --src gen -o energyml
           mv energyml src/
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-common'"$COMMON_VERSION_UNDERSCORE"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.COMMON_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
           sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-common'"$COMMON_VERSION_UNDERSCORE"'/g' README.md
+          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.COMMON_VERSION_UNDERSCORE }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -73,7 +77,7 @@ jobs:
       - name: Save build artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: dist-artifact-$COMMON_VERSION_UNDERSCORE
+          name: dist-artifact-${{ env.COMMON_VERSION_UNDERSCORE }}
           path: src/dist/
 
   publish:
@@ -95,6 +99,10 @@ jobs:
         run: |
           export COMMON_VERSION=`echo {{ $matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g'`
           export COMMON_VERSION_UNDERSCORE=`echo {{ $matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\.//g'`
+          
+          # export variable to github env          
+          echo "COMMON_VERSION=${{ env.COMMON_VERSION }}" >> $GITHUB_ENV
+          echo "COMMON_VERSION_UNDERSCORE=${{ env.COMMON_VERSION_UNDERSCORE }}" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -110,7 +118,7 @@ jobs:
       - name: Get build artifacts
         uses: actions/download-artifact@v2
         with:
-          name: dist-artifact-$COMMON_VERSION_UNDERSCORE
+          name: dist-artifact-${{ env.COMMON_VERSION_UNDERSCORE }}
           path: src/dist/
 
       - name: Install Poetry
@@ -121,9 +129,9 @@ jobs:
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-common'"$COMMON_VERSION_UNDERSCORE"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.COMMON_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
           sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-common'"$COMMON_VERSION_UNDERSCORE"'/g' README.md
+          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.COMMON_VERSION_UNDERSCORE }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -131,5 +139,5 @@ jobs:
         run: |
           cd src
           poetry config repositories.test https://test.pypi.org/legacy/
-          poetry config http-basic.test ${{ secrets.POETRY_PYPI_TOKEN_USERNAME}} ${{ secrets.POETRY_TEST_PYPI_TOKEN_PASSWORD}}
+          poetry config http-basic.test ${{ secrets.POETRY_PYPI_TOKEN_USERNAME }} ${{ secrets.POETRY_TEST_PYPI_TOKEN_PASSWORD }}
           poetry publish --repository test
