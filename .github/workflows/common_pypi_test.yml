@@ -125,5 +125,5 @@ jobs:
         run: |
           cd src
           poetry config repositories.pypi https://test.pypi.org/legacy/
-          poetry config ${{ secrets.POETRY_PYPI_TEST_TOKEN_NAME }} ${{ secrets.POETRY_PYPI_TEST_TOKEN_VALUE }}
+          poetry config ${{ secrets.POETRY_PYPI_TEST_TOKEN_NAME }}.pypi ${{ secrets.POETRY_PYPI_TEST_TOKEN_VALUE }}
           poetry publish --repository pypi
