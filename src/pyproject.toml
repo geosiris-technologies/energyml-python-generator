@@ -43,7 +43,7 @@ keywords = ["energyml", "resqml", "witsml", "prodml"]
 [tool.poetry.dependencies]
 python = "^3.9"
 coverage = {extras = ["toml"], version = "^6.2"}
-xsdata = {version = "^22.9", extras = ["cli"]}
+xsdata = {version = "^24.0"}
 #<PROJECT_DEPS>
 
 [tool.poetry.dev-dependencies]
