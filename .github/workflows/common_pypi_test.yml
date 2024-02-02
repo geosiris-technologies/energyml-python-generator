@@ -25,7 +25,7 @@ jobs:
       - name: Compute version env
         run: |
           export PKG_VERSION="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g')"
-          export $PKG_VERSION_UNDERSCORE="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
+          export PKG_VERSION_UNDERSCORE="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
           
           # export variable to github env          
           echo "PKG_VERSION=\"$PKG_VERSION\"" >> $GITHUB_ENV
