@@ -39,6 +39,7 @@ runs:
   steps:
 
     - name: Compute version env
+      shell: bash
       run: |
         export COMMON_VERSION=`echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g'`
         export COMMON_VERSION_UNDERSCORE=`echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\.//g'`
@@ -48,16 +49,20 @@ runs:
         echo "COMMON_VERSION_UNDERSCORE=$COMMON_VERSION_UNDERSCORE" >> $GITHUB_ENV
 
     - name: Download ${{ inputs.version-common }} v2.3
+      shell: bash
       run : wget ${{ inputs.xsd-url }} -P ${{ github.workspace }}
 
     - name: Unzip ${{ inputs.version-common }} v2.3
+      shell: bash
       run: 7z x ${{ github.workspace }}/${{ inputs.pkg-name }}*.zip -o${{ github.workspace }}/xsd/${{ inputs.pkg-name }}/
 
     - name: Generate
+      shell: bash
       run: |
         poetry run xsdata generate -ss namespaces -p gen --postponed-annotations xsd/${{ inputs.pkg-name }}/*/xsd_schemas/
 
     - name: Renaming
+      shell: bash
       run: |
         export ARGS_VERSION=`[ -n "${{ inputs.version-common }}" ] && echo '$ARGS_VERSION --common ${{ inputs.version-common }}'`
         export ARGS_VERSION=`[ -n "${{ inputs.version-resqml }}" ] && echo '$ARGS_VERSION --resqml ${{ inputs.version-resqml }}'`
@@ -67,6 +72,7 @@ runs:
         poetry run rename_pkgs $ARGS_VERSION --src gen -o energyml
 
     - name: Move only the appropriate module in src folder
+      shell: bash
       run: |
         function folder_match_pkg() {
             PKG=$(echo "$1" | tr '[:upper:]' '[:lower:]')
@@ -89,5 +95,6 @@ runs:
         mv energyml src/
 
     - name: Cleaning
+      shell: bash
       run: rm -rf gen
   
