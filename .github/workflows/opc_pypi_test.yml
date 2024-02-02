@@ -21,15 +21,6 @@ jobs:
         xsd-link: ["http://geosiris.com/wp-content/uploads/2022/09/opc.zip"]
     steps:
 
-      - name: Compute version env
-        run: |
-          export PKG_VERSION="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g')"
-          export PKG_VERSION_UNDERSCORE="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
-          
-          # export variable to github env          
-          echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
-          echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -54,10 +45,10 @@ jobs:
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"'/g' src/pyproject.toml
           sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
           sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -65,12 +56,13 @@ jobs:
         run: |
           cd src
           poetry install
+          poetry add poetry-dynamic-versioning
           poetry build
 
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-artifact-${{ env.PKG_VERSION_UNDERSCORE }}
+          name: dist-artifact
           path: src/dist/
 
   publish:
@@ -83,14 +75,6 @@ jobs:
         xsd-link: ["http://geosiris.com/wp-content/uploads/2022/09/opc.zip"]
 
     steps:
-      - name: Compute version env
-        run: |
-          export PKG_VERSION="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g')"
-          export PKG_VERSION_UNDERSCORE="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
-          
-          # export variable to github env          
-          echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
-          echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -106,7 +90,7 @@ jobs:
       - name: Get build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: dist-artifact-${{ env.PKG_VERSION_UNDERSCORE }}
+          name: dist-artifact
           path: src/dist/
 
       - name: Install poetry
@@ -122,10 +106,10 @@ jobs:
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"'/g' src/pyproject.toml
           sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
           sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
 

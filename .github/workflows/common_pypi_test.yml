@@ -69,6 +69,7 @@ jobs:
         run: |
           cd src
           poetry install
+          poetry add poetry-dynamic-versioning
           poetry build
 
       - name: Save build artifacts

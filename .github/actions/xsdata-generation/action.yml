@@ -63,6 +63,15 @@ runs:
       shell: bash
       run: 7z x ${{ github.workspace }}/${{ inputs.pkg-name }}*.zip -o${{ github.workspace }}/xsd/${{ inputs.pkg-name }}/
 
+    - name: Correct xsd content with too much backslash (for OPC)
+      shell: bash
+      if: ${{ inputs.pkg-name == 'opc' }}
+      run: |
+        for xsd_f in $(find sample/xsd/opc  | grep .xsd$ ); 
+        do
+            sed -i 's/\\&quot/\&quot/g' $xsd_f;
+        done
+
     - name: Generate
       if: ${{ inputs.download-only == 'false' }}
       shell: bash
