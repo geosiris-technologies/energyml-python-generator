@@ -35,7 +35,7 @@ def get_pkg(file_name: str, root_module: str, dict_version: dict, file_module_or
             return f'{root_module}.{pkg}.v{dict_version.get(pkg, "20")}'
 
     # OPC
-    if "openxmlformats" in file_module_or_dir_path or "purl" in file_module_or_dir_path or "lang_value" in file_name:
+    if "openxmlformats" in file_module_or_dir_path or "purl" in file_module_or_dir_path or "opc" in file_name:
         return f'{root_module}.opc'
 
     return f'{root_module}.eml.v{dict_version.get("eml", dict_version.get("common", "20"))}'

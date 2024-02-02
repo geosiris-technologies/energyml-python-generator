@@ -50,7 +50,7 @@ jobs:
         with:
           xsd-url: ${{ matrix.xsd-link }}
           pkg-name: ${{ env.PKG_NAME }}
-          generation-type: namespace-clusters
+          generation-type: single-package
 
       - name: Update toml
         run: |
