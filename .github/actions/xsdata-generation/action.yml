@@ -67,7 +67,8 @@ runs:
       if: ${{ inputs.download-only == 'false' }}
       shell: bash
       run: |
-        poetry run xsdata generate -ss ${{ inputs.generation-type }} -p gen --postponed-annotations xsd/${{ inputs.pkg-name }}/*/xsd_schemas/
+        export XSD_FOLDER=$(find xsd/${{ inputs.pkg-name }} | grep .xsd$ | head -n 1 | rev | cut -d'/' -f 2- | rev)
+        poetry run xsdata generate -ss ${{ inputs.generation-type }} -p gen --postponed-annotations $XSD_FOLDER
 
     - name: Renaming
       if: ${{ inputs.download-only == 'false' }}
