@@ -121,10 +121,14 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Upload to PyPI TEST
+      - name: Compute version env
+        shell: bash
         run: |
           echo "SRC_CONTENT=$(echo \"$(ls -R src)\")" >> $GITHUB_ENV
           export SRC_CONTENT_ENV=$(echo \"$(ls -R src)\")
+
+      - name: Upload to PyPI TEST
+        run: |
           cd src
           poetry config repositories.test-pypi https://test.pypi.org/legacy/
           poetry config pypi-token.test-pypi ${{ secrets.POETRY_PYPI_TEST_TOKEN_VALUE }}
