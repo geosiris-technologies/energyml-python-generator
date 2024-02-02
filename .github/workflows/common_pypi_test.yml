@@ -24,12 +24,12 @@ jobs:
 
       - name: Compute version env
         run: |
-          export COMMON_VERSION=`echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g'`
-          export COMMON_VERSION_UNDERSCORE=`echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g'`
+          export PKG_VERSION="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g')"
+          export $PKG_VERSION_UNDERSCORE="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
           
           # export variable to github env          
-          echo "COMMON_VERSION=$COMMON_VERSION" >> $GITHUB_ENV
-          echo "COMMON_VERSION_UNDERSCORE=$COMMON_VERSION_UNDERSCORE" >> $GITHUB_ENV
+          echo "PKG_VERSION=\"$PKG_VERSION\"" >> $GITHUB_ENV
+          echo "PKG_VERSION_UNDERSCORE=\"$PKG_VERSION_UNDERSCORE\"" >> $GITHUB_ENV
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -51,13 +51,13 @@ jobs:
         with:
           xsd-url: ${{ matrix.xsd-link }}
           pkg-name: common
-          version-common: ${{ env.COMMON_VERSION }}
+          version-common: ${{ env.PKG_VERSION }}
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.COMMON_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
           sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.COMMON_VERSION_UNDERSCORE }}"'/g' README.md
+          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -70,7 +70,7 @@ jobs:
       - name: Save build artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: dist-artifact-${{ env.COMMON_VERSION_UNDERSCORE }}
+          name: dist-artifact-${{ env.PKG_VERSION_UNDERSCORE }}
           path: src/dist/
 
   publish:
@@ -90,12 +90,12 @@ jobs:
     steps:
       - name: Compute version env
         run: |
-          export COMMON_VERSION=`echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g'`
-          export COMMON_VERSION_UNDERSCORE=`echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\.//g'`
+          export PKG_VERSION=`echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g'`
+          export PKG_VERSION_UNDERSCORE=`echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\.//g'`
           
           # export variable to github env          
-          echo "COMMON_VERSION=${{ env.COMMON_VERSION }}" >> $GITHUB_ENV
-          echo "COMMON_VERSION_UNDERSCORE=${{ env.COMMON_VERSION_UNDERSCORE }}" >> $GITHUB_ENV
+          echo "PKG_VERSION=${{ env.PKG_VERSION }}" >> $GITHUB_ENV
+          echo "PKG_VERSION_UNDERSCORE=${{ env.PKG_VERSION_UNDERSCORE }}" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -111,7 +111,7 @@ jobs:
       - name: Get build artifacts
         uses: actions/download-artifact@v2
         with:
-          name: dist-artifact-${{ env.COMMON_VERSION_UNDERSCORE }}
+          name: dist-artifact-${{ env.PKG_VERSION_UNDERSCORE }}
           path: src/dist/
 
       - name: Install Poetry
@@ -122,9 +122,9 @@ jobs:
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.COMMON_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
           sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.COMMON_VERSION_UNDERSCORE }}"'/g' README.md
+          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
           ls -l src
