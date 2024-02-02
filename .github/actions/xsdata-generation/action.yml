@@ -95,7 +95,8 @@ runs:
         done
         
         mv energyml src/energyml-${{ inputs.pkg-name }}${{ env.PKG_VERSION_UNDERSCORE }}
-        ls -lr src
+        
+        echo "SRC_CONTENT=$(ls -lr src)" >> $GITHUB_ENV
 
     - name: Cleaning
       shell: bash
