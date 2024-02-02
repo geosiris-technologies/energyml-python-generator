@@ -101,8 +101,6 @@ runs:
         done
         
         mv energyml src/energyml
-        
-        echo "SRC_CONTENT=$(echo \"$(ls -R src)\")" >> $GITHUB_ENV
 
     - name: Cleaning
       if: ${{ inputs.download-only == 'false' }}
