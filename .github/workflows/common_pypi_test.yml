@@ -61,7 +61,6 @@ jobs:
           sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
-          ls -l src
 
       - name: build
         run: |
@@ -126,6 +125,15 @@ jobs:
         run: |
           echo "SRC_CONTENT=$(echo \"$(ls -R src)\")" >> $GITHUB_ENV
           export SRC_CONTENT_ENV=$(echo \"$(ls -R src)\")
+
+      - name: Update toml
+        run: |
+          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
+          sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
+          cp README.md src/
+          cp LICENSE src/
 
       - name: Upload to PyPI TEST
         run: |
