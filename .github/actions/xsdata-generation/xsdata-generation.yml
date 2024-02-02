@@ -1,0 +1,97 @@
+##
+## Copyright (c) 2022-2023 Geosiris.
+## SPDX-License-Identifier: Apache-2.0
+##
+---
+
+name: Prepare Python and Poetry
+Description: Install Python, Poetry and dev dependencies, cached for speed
+
+inputs:
+  
+  xsd-url:  
+    description: 'Url of the zip that contains the xsd files'
+    required: true
+  
+  pkg-name:
+    description: 'name of the package to generate (common|resqml|witsml|prodml)'
+    required: true
+
+  version-common:
+    description: 'version of the common package'
+    required: true
+
+  version-resqml:
+    description: 'version of the resqml package (if used for the generation)'
+    required: true
+    default: ""
+
+  version-witsml:
+    description: 'version of the witsml package (if used for the generation)'
+    required: true
+    default: ""
+
+  version-prodml:
+    description: 'version of the prodml package (if used for the generation)'
+    required: true
+    default: ""
+
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Compute version env
+      run: |
+        export COMMON_VERSION=`echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g'`
+        export COMMON_VERSION_UNDERSCORE=`echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\.//g'`
+        
+        # export variable to github env          
+        echo "COMMON_VERSION=$COMMON_VERSION" >> $GITHUB_ENV
+        echo "COMMON_VERSION_UNDERSCORE=$COMMON_VERSION_UNDERSCORE" >> $GITHUB_ENV
+
+    - name: Download ${{ inputs.version-common }} v2.3
+      run : wget ${{ inputs.xsd-url }} -P ${{ github.workspace }}
+
+    - name: Unzip ${{ inputs.version-common }} v2.3
+      run: 7z x ${{ github.workspace }}/${{ inputs.pkg-name }}*.zip -o${{ github.workspace }}/xsd/${{ inputs.pkg-name }}/
+
+    - name: Generate
+      run: |
+        poetry install
+        poetry run xsdata generate -ss namespaces -p gen --postponed-annotations xsd/${{ inputs.pkg-name }}/*/xsd_schemas/
+
+    - name: Renaming
+      run: |
+        export ARGS_VERSION=`[ -n "${{ inputs.version-common }}" ] && echo '$ARGS_VERSION --common ${{ inputs.version-common }}'`
+        export ARGS_VERSION=`[ -n "${{ inputs.version-resqml }}" ] && echo '$ARGS_VERSION --resqml ${{ inputs.version-resqml }}'`
+        export ARGS_VERSION=`[ -n "${{ inputs.version-witsml }}" ] && echo '$ARGS_VERSION --witsml ${{ inputs.version-witsml }}'`
+        export ARGS_VERSION=`[ -n "${{ inputs.version-prodml }}" ] && echo '$ARGS_VERSION --prodml ${{ inputs.version-prodml }}'`
+        
+        poetry run rename_pkgs $ARGS_VERSION --src gen -o energyml
+
+    - name: Move only the appropriate module in src folder
+      run: |
+        function folder_match_pkg() {
+            PKG=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+            FOLDER=$(echo "$2" | tr '[:upper:]' '[:lower:]')
+            if [ "$PKG" = "$FOLDER" ] || { [ "$PKG" = "common" ] && [ "$FOLDER" = "eml" ] ;};
+            then
+              return 0;
+            else
+              return 1;
+            fi
+        }
+                
+        for f in $(ls energyml); do; 
+          if folder_match_pkg ${{ inputs.pkg-name }} $f;
+          then echo "$f true";
+          else echo "$f false";
+          fi
+        done
+        
+        mv energyml src/
+
+    - name: Cleaning
+      run: rm -rf gen
+  

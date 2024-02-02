@@ -11,7 +11,112 @@ import sys
 PATTERN = r"(from|import)\s+(?P<oldPkg>((?:(?!common|resqml|witsml|prodml))\w+\.)+)\.?(?P<pkg>common|resqml|witsml|prodml)v2\W"
 
 
-def _rename_pkgs(v_common: str, v_resqml: str, v_witsml: str, v_prodml: str, src_folder: str,
+def specific_modification(file_name: str, root_module: str, dict_version: dict, file_content):
+    print(f"file_name : {file_name} root_module : {root_module}")
+    if file_name.lower().startswith("gmd"):
+        return re.sub(pattern=rf'(?P<firstImport>^(from|import)\s+{root_module})',
+                      repl=f"from {get_pkg(file_name, root_module, dict_version)}.gsr import ScCrsPropertyType\n\g<firstImport>",
+                      string=file_content,
+                      flags=re.MULTILINE,
+                      count=1)
+    return file_content
+
+
+def get_pkg(file_name: str, root_module: str, dict_version: dict):
+    f""" 
+        return a pkg name like resqml.v20.{file_name}
+        dict_version is a dict associating a pkg to its version
+    """
+    file_name = file_name[:-3] if file_name.endswith(".py") else file_name
+    file_name = file_name.lower()
+
+    for pkg in ["resqml", "witsml", "prodml"]:
+        if re.match(pkg, file_name) is not None:
+            return f'{root_module}.{pkg}.v{dict_version.get(pkg, "20")}'
+
+    return f'{root_module}.eml.v{dict_version.get("eml", dict_version.get("common", "20"))}'
+
+
+# poetry run xsdata generate -ss namespaces -p gen --postponed-annotations ..\sample\xsd\resqml\v2.0.1\xsd_schemas\
+# poetry run rename_pkgs --common 2.0 --resqml 2.0.1 --src gen -o energyml
+def  _rename_pkgs(v_common: str,
+                  v_resqml: str,
+                  v_witsml: str,
+                  v_prodml: str,
+                  src_folder: str,
+                  new_pkg_prefix: str = "energyml"):
+    new_pkg_path_prefix = new_pkg_prefix.replace('.', '/')
+    new_pkg_import_prefix = (new_pkg_prefix.replace('\\', '.')
+                             .replace('/', '.')
+                             .replace("-", "_"))
+    if "." in new_pkg_import_prefix:
+        new_pkg_import_prefix = new_pkg_import_prefix[new_pkg_import_prefix.index(".") + 1:]
+
+    if v_resqml:
+        v_resqml = v_resqml.replace(".", "_")
+    if v_common:
+        v_common = v_common.replace(".", "_")
+    if v_witsml:
+        v_witsml = v_witsml.replace(".", "_")
+    if v_prodml:
+        v_prodml = v_prodml.replace(".", "_")
+
+    dict_version = {
+        'common': v_common,
+        'resqml': v_resqml,
+        'witsml': v_witsml,
+        'prodml': v_prodml,
+    }
+
+    try:
+        os.mkdir(new_pkg_prefix)
+    except OSError as error:
+        pass
+
+    print(f"BEGIN {src_folder}")
+
+    module_names = []
+
+    for root, dirs, files in os.walk(src_folder):
+        root_path = root.replace("\\", "/")
+        for file in files:
+            print(f" ==> {root_path}/--{file}")
+            if file.endswith(".py") and not file.endswith("__init__.py"):
+                file_folder_path = get_pkg(file, new_pkg_import_prefix, dict_version).replace('.', '/')
+                try:
+                    os.makedirs(file_folder_path)
+                except OSError as error:
+                    pass
+                module_names.append(file[:-3])
+                shutil.copy(root_path + "/" + file, f"{file_folder_path}/{file}")
+
+    for root, dirs, files in os.walk(new_pkg_prefix):
+        for file in files:
+            with open(root + "/" + file, "r") as f:
+                file_content = f.read()
+
+            if file_content is not None:
+                for m_name in module_names:
+                    # print("Searching pattern ", rf'(?P<prefix>(^|\n)(from|import)\s+)(\w+\.)*{m_name} in file {file}')
+                    try:
+                        file_content = re.sub(
+                            pattern=rf'(?P<prefix>^(from|import)\s+)(\w+\.)*{m_name}',
+                            repl=rf"\g<prefix>{get_pkg(m_name, new_pkg_import_prefix, dict_version)}.{m_name}",
+                            string=file_content,
+                            flags=re.MULTILINE
+                        )
+                    except Exception as e:
+                        print(f"ERR in {file}:\n\t{e}")
+
+            # Bugfix after xsdata generation
+            file_content = specific_modification(file, new_pkg_import_prefix, dict_version, file_content)
+
+            with open(root + "/" + file, "w") as f:
+                f.write(file_content)
+
+
+
+def _rename_pkgs_old(v_common: str, v_resqml: str, v_witsml: str, v_prodml: str, src_folder: str,
                  new_pkg_prefix: str = "energyml"):
     new_pkg_path_prefix = new_pkg_prefix.replace('.', '/')
     new_pkg_import_prefix = new_pkg_prefix.replace('/', '.').replace("-", "_")
@@ -105,8 +210,11 @@ def _rename_pkgs(v_common: str, v_resqml: str, v_witsml: str, v_prodml: str, src
 
     folders = re.split(r"[/\\]", new_pkg_path_prefix)
     for i in range(len(folders)):
-        with open(f"{'/'.join(folders[:i + 1])}/__init__.py", 'w') as f_init:
-            f_init.write("")
+        try:
+            with open(f"{'/'.join(folders[:i + 1])}/__init__.py", 'w') as f_init:
+                f_init.write("")
+        except Exception:
+            pass
 
 
 def rename_pkgs():
@@ -145,7 +253,7 @@ def rename_pkgs():
 
     _rename_pkgs(args.common, args.resqml, args.witsml, args.prodml, args.src, args.newFolder)
 
-
+"""
 if __name__ == "__main__":
     file_path = "sample/data/TriangulatedSetRepresentation_349ecd25-5db0-40c1-b179-b5316fbc754f.xml"
 
@@ -174,7 +282,7 @@ if __name__ == "__main__":
         ))
         print(serializer.render(obj))
         print(obj.validate())
-
+"""
 # poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations .\sample\xsd\opc\opc-all.xsd
 # poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations .\sample\xsd\resqml\v2.2\xsd_schemas\
 # poetry run rename_pkgs --common 2.3 --resqml 2.2 --src gen -o gen2

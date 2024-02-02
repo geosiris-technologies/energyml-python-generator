@@ -28,6 +28,9 @@ python = "^3.9"
 coverage = {extras = ["toml"], version = "^6.2"}
 xsdata = {version = "^24.0", extras = ["cli", "lxml"]}
 
-
 [tool.poetry.scripts]
 rename_pkgs = "energyml-python-generator.main:rename_pkgs"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^7.0.0"
+

@@ -24,8 +24,8 @@ jobs:
 
       - name: Compute version env
         run: |
-          export COMMON_VERSION=`echo {{ $matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g'`
-          export COMMON_VERSION_UNDERSCORE=`echo {{ $matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\.//g'`
+          export COMMON_VERSION=`echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g'`
+          export COMMON_VERSION_UNDERSCORE=`echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\.//g'`
           
           # export variable to github env          
           echo "COMMON_VERSION=$COMMON_VERSION" >> $GITHUB_ENV
@@ -41,24 +41,17 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Download COMMON v2.3
-        run : wget ${{ matrix.xsd-link }} -P ${{ github.workspace }}
+      - name: Install poetry
+        uses: ./.github/actions/prepare-poetry
+        with:
+          python-version: 3.9
 
-      - name: Unzip COMMON v2.3
-        run: 7z x ${GITHUB_WORKSPACE}/common*.zip -o${{ github.workspace }}/xsd/common/
-
-      - name: Install Poetry
-        run: |
-          python -m pip install --upgrade pip
-          pip install poetry
-          pip install poetry-dynamic-versioning
-
-      - name: generate
-        run: |
-          poetry install
-          poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations xsd/common/*/xsd_schemas/
-          poetry run rename_pkgs --common ${{ env.COMMON_VERSION }} --src gen -o energyml
-          mv energyml src/
+      - name: Generate python classes
+        uses: ./.github/actions/xsdata-generation
+        with:
+          xsd-url: ${{ inputs.xsd-url }}
+          pkg-name: common
+          version-common: ${{ env.COMMON_VERSION }}
 
       - name: Update toml
         run: |
