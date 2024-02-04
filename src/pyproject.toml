@@ -4,7 +4,7 @@ build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry]
 name = "<PROJECT_NAME>"
-version = "0.0.1" # Set at build time
+version = "0.0.0" # Set at build time
 description = "<PROJECT_NAME> types"
 authors = [
     "Valentin Gauthier <valentin.gauthier@geosiris.com>"
@@ -41,7 +41,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.9"
-xsdata = {version = "^22.9"}
+xsdata = {version = "^24.0"}
 #<PROJECT_DEPS>
 
 [tool.poetry.dev-dependencies]
