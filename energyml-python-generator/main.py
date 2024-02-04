@@ -301,4 +301,5 @@ if __name__ == "__main__":
 # poetry run rename_pkgs --common 2.3 --prodml 2.2 --src gen -o energyml.v22
 
 
-# poetry run xsdata generate -ss namespaces -p gen --postponed-annotations .\sample\xsd\opc\
+# poetry run xsdata generate -ss single-package -p gen --postponed-annotations .\sample\xsd\opc\
+# poetry run rename_pkgs --src gen -o energyml

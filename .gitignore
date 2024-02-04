@@ -48,3 +48,4 @@ doc/
 sample/
 gen*/
 energyml
+src/*.lock
