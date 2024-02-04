@@ -1,0 +1,128 @@
+##
+## Copyright (c) 2022-2023 Geosiris.
+## SPDX-License-Identifier: Apache-2.0
+##
+---
+
+name: Prepare Python and Poetry
+Description: Install Python, Poetry and dev dependencies, cached for speed
+
+inputs:
+  
+  xsd-url:  
+    description: 'Url of the zip that contains the xsd files'
+    required: true
+  
+  pkg-name:
+    description: 'name of the package to generate (common|resqml|witsml|prodml|opc)'
+    required: true
+
+  version-common:
+    description: 'version of the common package'
+    default: ""
+
+  version-resqml:
+    description: 'version of the resqml package (if used for the generation)'
+    default: ""
+
+  version-witsml:
+    description: 'version of the witsml package (if used for the generation)'
+    default: ""
+
+  version-prodml:
+    description: 'version of the prodml package (if used for the generation)'
+    default: ""
+
+  download-only:
+    description: 'stops the process after the zip download and extract, the generation will not be done'
+    default: 'false'
+
+  generation-type:
+    description: 'xsdata generation type'
+    default: 'namespaces'
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Compute version env
+      shell: bash
+      run: |
+        export PKG_VERSION="$(echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g')"
+        export PKG_VERSION_UNDERSCORE="$(echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
+        
+        # export variable to github env          
+        echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+        echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
+
+    - name: Download ${{ inputs.pkg-name }} xsd zip ${{ inputs.pkg-name }}
+      shell: bash
+      run : wget ${{ inputs.xsd-url }} -P ${{ github.workspace }}
+
+    - name: Unzip ${{ inputs.pkg-name }} xsd zip ${{ inputs.pkg-name }}
+      shell: bash
+      run: 7z x ${{ github.workspace }}/${{ inputs.pkg-name }}*.zip -o${{ github.workspace }}/xsd/${{ inputs.pkg-name }}/
+
+    - name: Correct xsd content with too much backslash (for OPC)
+      shell: bash
+      if: ${{ inputs.pkg-name == 'opc' }}
+      run: |
+        for xsd_f in $(find xsd/${{ inputs.pkg-name }} | grep .xsd$ ); 
+        do
+            sed -i 's/\\&quot/\&quot/g' $xsd_f;
+        done
+
+    - name: Generate
+      if: ${{ inputs.download-only == 'false' }}
+      shell: bash
+      run: |
+        export XSD_FOLDER=$(find xsd/${{ inputs.pkg-name }} | grep .xsd$ | head -n 1 | rev | cut -d'/' -f 2- | rev)
+        if ${{ inputs.generation-type == 'single-package' }}; then
+          poetry run xsdata generate -ss ${{ inputs.generation-type }} -p gen.${{ inputs.pkg-name }} --postponed-annotations $XSD_FOLDER;
+        else
+          poetry run xsdata generate -ss ${{ inputs.generation-type }} -p gen --postponed-annotations $XSD_FOLDER;
+        fi
+
+    - name: Renaming
+      if: ${{ inputs.download-only == 'false' }}
+      shell: bash
+      run: |
+        export ARGS_VERSION=$(   [ -n "${{ inputs.version-common }}" ]     && echo " --common ${{ inputs.version-common }}")
+        export ARGS_VERSION=$(if [ -n "${{ inputs.version-resqml }}" ]; then echo "$ARGS_VERSION --resqml ${{ inputs.version-resqml }}"; else echo "$ARGS_VERSION"; fi)
+        export ARGS_VERSION=$(if [ -n "${{ inputs.version-witsml }}" ]; then echo "$ARGS_VERSION --witsml ${{ inputs.version-witsml }}"; else echo "$ARGS_VERSION"; fi)
+        export ARGS_VERSION=$(if [ -n "${{ inputs.version-prodml }}" ]; then echo "$ARGS_VERSION --prodml ${{ inputs.version-prodml }}"; else echo "$ARGS_VERSION"; fi)
+        echo $ARGS_VERSION
+
+        poetry run rename_pkgs $ARGS_VERSION --src gen -o energyml
+
+    - name: Move only the appropriate module in src folder
+      if: ${{ inputs.download-only == 'false' }}
+      shell: bash
+      run: |
+        function folder_match_pkg() {
+            PKG=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+            FOLDER=$(echo "$2" | tr '[:upper:]' '[:lower:]')
+            if [ "$PKG" = "$FOLDER" ] || { [ "$PKG" = "common" ] && [ "$FOLDER" = "eml" ] ;};
+            then
+              return 0;
+            else
+              return 1;
+            fi
+        }
+                
+        for f in $(ls energyml); do
+          if folder_match_pkg ${{ inputs.pkg-name }} $f;
+          then echo "$f kept";
+          else 
+            echo "removing $f";
+            rm -rf $f;
+          fi
+        done
+        
+        mv energyml src/energyml
+
+    - name: Cleaning
+      if: ${{ inputs.download-only == 'false' }}
+      shell: bash
+      run: rm -rf gen
+  

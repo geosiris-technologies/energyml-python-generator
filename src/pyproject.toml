@@ -1,16 +1,16 @@
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
-build-backend = "poetry.masonry.api"
+build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry]
 name = "<PROJECT_NAME>"
-version = "0.0.1" # Set at build time
-description = "Energyml types"
+version = "0.0.0" # Set at build time
+description = "<PROJECT_NAME> types"
 authors = [
     "Valentin Gauthier <valentin.gauthier@geosiris.com>"
 ]
 maintainers = [
-    "Lionel Untereiner <lionel.untereiner@geosiris.com>", 
+    "Lionel Untereiner <lionel.untereiner@geosiris.com>",
     "Valentin Gauthier <valentin.gauthier@geosiris.com>"
 ]
 license = "Apache-2.0"
@@ -27,7 +27,6 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python",
-    "Topic :: Internet :: WWW/HTTP",
     "Topic :: Internet",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -36,16 +35,17 @@ classifiers = [
     "Typing :: Typed",
 ]
 keywords = ["energyml", "resqml", "witsml", "prodml"]
-# packages = [
-    # { include = "<PROJECT_NAME>" },
-# ]
+packages = [
+    { include = "<PROJECT_SRC_FOLDER>" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-coverage = {extras = ["toml"], version = "^6.2"}
-xsdata = {version = "^22.9", extras = ["cli"]}
+xsdata = {version = "^24.0", extras = ["lxml"]}
+#<PROJECT_DEPS>
 
 [tool.poetry.dev-dependencies]
+coverage = {extras = ["toml"], version = "^6.2"}
 pytest = "^7.0.0"
 flake8 = "^4.0.0"
 black = "^22.3.0"
@@ -89,3 +89,5 @@ format-jinja = """
         {{ serialize_pep440(bump_version(base), stage, revision, dev=distance) }}
     {%- endif -%}
 """
+
+# add : , metadata=[commit]  in the format jinja if needed

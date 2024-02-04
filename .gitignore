@@ -46,3 +46,6 @@ utils/
 requirements.txt
 doc/
 sample/
+gen*/
+energyml
+src/*.lock

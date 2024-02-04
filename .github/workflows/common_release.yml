@@ -2,14 +2,14 @@
 ## Copyright (c) 2022-2023 Geosiris.
 ## SPDX-License-Identifier: Apache-2.0
 ##
-name: OPC pypi
+name: Energyml Package common pypi
 
 on:
   release:
     types: [created]
 
 env:
-  PKG_NAME: opc
+  PKG_NAME: common
 
 jobs:
 
@@ -19,8 +19,22 @@ jobs:
 
     strategy:
       matrix:
-        xsd-link: ["http://geosiris.com/wp-content/uploads/2022/09/opc.zip"]
+        xsd-link: [
+          "http://geosiris.com/wp-content/uploads/2022/09/common_v2.0.zip",
+          "http://geosiris.com/wp-content/uploads/2022/09/common_v2.1.zip",
+          "http://geosiris.com/wp-content/uploads/2022/09/common_v2.2.zip",
+          "http://geosiris.com/wp-content/uploads/2022/09/common_v2.3.zip"
+        ]
     steps:
+
+      - name: Compute version env
+        run: |
+          export PKG_VERSION="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g')"
+          export PKG_VERSION_UNDERSCORE="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
+          
+          # export variable to github env          
+          echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+          echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -42,14 +56,14 @@ jobs:
         with:
           xsd-url: ${{ matrix.xsd-link }}
           pkg-name: ${{ env.PKG_NAME }}
-          generation-type: single-package
+          version-common: ${{ env.PKG_VERSION }}
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
           sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
           sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"'/g' README.md
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -63,7 +77,7 @@ jobs:
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-artifact
+          name: dist-artifact-${{ env.PKG_VERSION_UNDERSCORE }}
           path: src/dist/
 
   publish:
@@ -73,9 +87,22 @@ jobs:
 
     strategy:
       matrix:
-        xsd-link: ["http://geosiris.com/wp-content/uploads/2022/09/opc.zip"]
+        xsd-link: [
+          "http://geosiris.com/wp-content/uploads/2022/09/common_v2.0.zip",
+          "http://geosiris.com/wp-content/uploads/2022/09/common_v2.1.zip",
+          "http://geosiris.com/wp-content/uploads/2022/09/common_v2.2.zip",
+          "http://geosiris.com/wp-content/uploads/2022/09/common_v2.3.zip"
+        ]
 
     steps:
+      - name: Compute version env
+        run: |
+          export PKG_VERSION="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g')"
+          export PKG_VERSION_UNDERSCORE="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
+          
+          # export variable to github env          
+          echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+          echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -91,7 +118,7 @@ jobs:
       - name: Get build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: dist-artifact
+          name: dist-artifact-${{ env.PKG_VERSION_UNDERSCORE }}
           path: src/dist/
 
       - name: Install poetry
@@ -107,10 +134,10 @@ jobs:
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
           sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
           sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"'/g' README.md
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
 

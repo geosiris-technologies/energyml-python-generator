@@ -1,0 +1,210 @@
+##
+## Copyright (c) 2022-2023 Geosiris.
+## SPDX-License-Identifier: Apache-2.0
+##
+name: Energyml Package resqml pypi-test
+
+on: [pull_request]
+
+env:
+  PKG_NAME: resqml
+  map-resqml-to-common: '{"2.0.1" : "2.0", "2.2_dev3": "2.2", "2.2": "2.3"}'
+
+jobs:
+
+  common-xsd-download:
+    name: Download common packages
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        xsd-link: [
+          "http://geosiris.com/wp-content/uploads/2022/09/common_v2.0.zip",
+          "http://geosiris.com/wp-content/uploads/2022/09/common_v2.1.zip",
+          "http://geosiris.com/wp-content/uploads/2022/09/common_v2.2.zip",
+          "http://geosiris.com/wp-content/uploads/2022/09/common_v2.3.zip"
+        ]
+    steps:
+
+      - name: Compute version env
+        run: |
+          export PKG_VERSION="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g')"
+          export PKG_VERSION_UNDERSCORE="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
+          
+          # export variable to github env          
+          echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+          echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install poetry
+        uses: ./.github/actions/prepare-poetry
+        with:
+          python-version: 3.9
+
+      - name: Generate python classes
+        uses: ./.github/actions/xsdata-generation
+        with:
+          xsd-url: ${{ matrix.xsd-link }}
+          pkg-name: common
+          version-common: ${{ env.PKG_VERSION }}
+          download-only: true
+
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-artifact-common-${{ env.PKG_VERSION_UNDERSCORE }}
+          path: xsd/
+
+  build:
+    name: Build $PKG_NAME package
+    needs: [common-xsd-download]
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        xsd-link: [
+          "http://geosiris.com/wp-content/uploads/2022/09/resqml_v2.0.1.zip",
+          "http://geosiris.com/wp-content/uploads/2022/09/resqml_v2.2_dev3.zip",
+          "http://geosiris.com/wp-content/uploads/2022/09/resqml_v2.2.zip"
+        ]
+
+    steps:
+      - name: Compute version env
+        run: |
+          export PKG_VERSION="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g')"
+          export PKG_VERSION_UNDERSCORE="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
+          
+          # export variable to github env          
+          echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+          echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
+
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dist-artifact-common-*
+          merge-multiple: true
+          path: xsd/
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install poetry
+        uses: ./.github/actions/prepare-poetry
+        with:
+          python-version: 3.9
+
+      - name: Generate python classes
+        uses: ./.github/actions/xsdata-generation
+        with:
+          xsd-url: ${{ matrix.xsd-link }}
+          pkg-name: ${{ env.PKG_NAME }}
+          version-common: ${{ fromJSON(env.map-resqml-to-common)[env.PKG_VERSION] }}
+          version-resqml: ${{ env.PKG_VERSION }}
+
+      - name: Update toml
+        run: |
+          export COMMON_VERSION_UNDERSCORE=$( echo ${{ fromJSON(env.map-resqml-to-common)[env.PKG_VERSION] }} | sed -r 's/\./_/g')
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
+          sed -i 's/#\s*<PROJECT_DEPS>/common'"$COMMON_VERSION_UNDERSCORE"' = "^1.0.0"/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
+          cp README.md src/
+          cp LICENSE src/
+
+      - name: build
+        run: |
+          cd src
+          poetry install
+          poetry self add "poetry-dynamic-versioning[plugin]"
+          poetry build
+
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-artifact-${{ env.PKG_VERSION_UNDERSCORE }}
+          path: src/dist/
+
+  publish:
+    name: Publish to PyPI
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        xsd-link: [
+          "http://geosiris.com/wp-content/uploads/2022/09/resqml_v2.0.1.zip",
+          "http://geosiris.com/wp-content/uploads/2022/09/resqml_v2.2_dev3.zip",
+          "http://geosiris.com/wp-content/uploads/2022/09/resqml_v2.2.zip"
+        ]
+
+    steps:
+      - name: Compute version env
+        run: |
+          export PKG_VERSION="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g')"
+          export PKG_VERSION_UNDERSCORE="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
+          
+          # export variable to github env          
+          echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+          echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      # Retrieve the code and GIT history so that poetry-dynamic-versioning knows which version to upload
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-artifact-${{ env.PKG_VERSION_UNDERSCORE }}
+          path: src/dist/
+
+      - name: Install poetry
+        uses: ./.github/actions/prepare-poetry
+        with:
+          python-version: 3.9
+
+      - name: Compute version env
+        shell: bash
+        run: |
+          echo "SRC_CONTENT=$(echo \"$(ls -R src)\")" >> $GITHUB_ENV
+          export SRC_CONTENT_ENV=$(echo \"$(ls -R src)\")
+
+      - name: Update toml
+        run: |
+          export COMMON_VERSION_UNDERSCORE=$( echo ${{ fromJSON(env.map-resqml-to-common)[env.PKG_VERSION] }} | sed -r 's/\./_/g')
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
+          sed -i 's/#\s*<PROJECT_DEPS>/common'"$COMMON_VERSION_UNDERSCORE"' = "^1.0.0"/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
+          cp README.md src/
+          cp LICENSE src/
+
+      - name: Upload to PyPI TEST
+        run: |
+          cd src
+          poetry self add "poetry-dynamic-versioning[plugin]"
+          poetry config repositories.test-pypi https://test.pypi.org/legacy/
+          poetry config pypi-token.test-pypi ${{ secrets.POETRY_PYPI_TEST_TOKEN_VALUE }}
+          poetry publish --repository test-pypi
