@@ -54,7 +54,7 @@ jobs:
         uses: ./.github/actions/xsdata-generation
         with:
           xsd-url: ${{ matrix.xsd-link }}
-          pkg-name: ${{ env.PKG_NAME }}
+          pkg-name: common
           version-common: ${{ env.PKG_VERSION }}
           download-only: true
 
