@@ -122,7 +122,7 @@ jobs:
           export COMMON_VERSION_UNDERSCORE=$( echo ${{ fromJSON(env.map-resqml-to-common)[env.PKG_VERSION] }} | sed -r 's/\./_/g')
           sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
           sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
-          sed -i 's/#\s*<PROJECT_DEPS>/common'"$COMMON_VERSION_UNDERSCORE"' = "^1.0.0"/g' src/pyproject.toml
+          sed -i 's/#\s*<PROJECT_DEPS>/energyml-common'"$COMMON_VERSION_UNDERSCORE"' = "^1.0.0"/g' src/pyproject.toml
           sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
@@ -196,7 +196,7 @@ jobs:
           export COMMON_VERSION_UNDERSCORE=$( echo ${{ fromJSON(env.map-resqml-to-common)[env.PKG_VERSION] }} | sed -r 's/\./_/g')
           sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
           sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
-          sed -i 's/#\s*<PROJECT_DEPS>/common'"$COMMON_VERSION_UNDERSCORE"' = "^1.0.0"/g' src/pyproject.toml
+          sed -i 's/#\s*<PROJECT_DEPS>/energyml-common'"$COMMON_VERSION_UNDERSCORE"' = "^1.0.0"/g' src/pyproject.toml
           sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
