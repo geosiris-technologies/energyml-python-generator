@@ -206,4 +206,4 @@ jobs:
           cd src
           poetry self add "poetry-dynamic-versioning[plugin]"
           poetry config pypi-token.pypi ${{ secrets.POETRY_PYPI_TOKEN_PASSWORD }}
-          poetry publish --repository test-pypi
+          poetry publish
