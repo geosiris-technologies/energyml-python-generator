@@ -93,7 +93,7 @@ runs:
         export ARGS_VERSION=$(if [ -n "${{ inputs.version-prodml }}" ]; then echo "$ARGS_VERSION --prodml ${{ inputs.version-prodml }}"; else echo "$ARGS_VERSION"; fi)
         echo $ARGS_VERSION
 
-        poetry run rename_pkgs "$ARGS_VERSION" --src gen -o energyml
+        poetry run rename_pkgs $ARGS_VERSION --src gen -o energyml
 
     - name: Move only the appropriate module in src folder
       if: ${{ inputs.download-only == 'false' }}
