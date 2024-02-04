@@ -2,9 +2,14 @@
 ## Copyright (c) 2022-2023 Geosiris.
 ## SPDX-License-Identifier: Apache-2.0
 ##
-name: Energyml Package common pypi-test
+name: Energyml Package common pypi
 
-on: [pull_request]
+on:
+  release:
+    types: [created]
+
+env:
+  PKG_NAME: common
 
 jobs:
 
@@ -24,47 +29,41 @@ jobs:
 
       - name: Compute version env
         run: |
-          export COMMON_VERSION=`echo {{ $matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g'`
-          export COMMON_VERSION_UNDERSCORE=`echo {{ $matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\.//g'`
+          export PKG_VERSION="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g')"
+          export PKG_VERSION_UNDERSCORE="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
           
           # export variable to github env          
-          echo "COMMON_VERSION=$COMMON_VERSION" >> $GITHUB_ENV
-          echo "COMMON_VERSION_UNDERSCORE=$COMMON_VERSION_UNDERSCORE" >> $GITHUB_ENV
+          echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+          echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.9'
 
-      - name: Download COMMON v2.3
-        run : wget ${{ matrix.xsd-link }} -P ${{ github.workspace }}
-
-      - name: Unzip COMMON v2.3
-        run: 7z x ${GITHUB_WORKSPACE}/common*.zip -o${{ github.workspace }}/xsd/common/
-
-      - name: Install dependencies
+      - name: Install poetry
         uses: ./.github/actions/prepare-poetry
         with:
           python-version: 3.9
 
-      - name: generate
-        run: |
-          poetry install
-          poetry run xsdata generate -ss single-package -p gen.common.commonv2 --postponed-annotations xsd/common/*/xsd_schemas/
-#          poetry run xsdata generate -ss namespaces -p gen --postponed-annotations ../xsd/common/*/xsd_schemas/
-          poetry run rename_pkgs --common ${{ env.COMMON_VERSION }} --src gen -o energyml
-          mv energyml src/
+      - name: Generate python classes
+        uses: ./.github/actions/xsdata-generation
+        with:
+          xsd-url: ${{ matrix.xsd-link }}
+          pkg-name: ${{ env.PKG_NAME }}
+          version-common: ${{ env.PKG_VERSION }}
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.COMMON_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
           sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.COMMON_VERSION_UNDERSCORE }}"'/g' README.md
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -72,12 +71,13 @@ jobs:
         run: |
           cd src
           poetry install
+          poetry add poetry-dynamic-versioning
           poetry build
 
       - name: Save build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: dist-artifact-${{ env.COMMON_VERSION_UNDERSCORE }}
+          name: dist-artifact-${{ env.PKG_VERSION_UNDERSCORE }}
           path: src/dist/
 
   publish:
@@ -97,47 +97,52 @@ jobs:
     steps:
       - name: Compute version env
         run: |
-          export COMMON_VERSION=`echo {{ $matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g'`
-          export COMMON_VERSION_UNDERSCORE=`echo {{ $matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\.//g'`
+          export PKG_VERSION="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g')"
+          export PKG_VERSION_UNDERSCORE="$(echo ${{ matrix.xsd-link }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
           
           # export variable to github env          
-          echo "COMMON_VERSION=${{ env.COMMON_VERSION }}" >> $GITHUB_ENV
-          echo "COMMON_VERSION_UNDERSCORE=${{ env.COMMON_VERSION_UNDERSCORE }}" >> $GITHUB_ENV
+          echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+          echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.9'
 
       # Retrieve the code and GIT history so that poetry-dynamic-versioning knows which version to upload
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Get build artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
-          name: dist-artifact-${{ env.COMMON_VERSION_UNDERSCORE }}
+          name: dist-artifact-${{ env.PKG_VERSION_UNDERSCORE }}
           path: src/dist/
 
-      - name: Install Poetry
+      - name: Install poetry
+        uses: ./.github/actions/prepare-poetry
+        with:
+          python-version: 3.9
+
+      - name: Compute version env
+        shell: bash
         run: |
-          python -m pip install --upgrade pip
-          pip install poetry
-          pip install poetry-dynamic-versioning
+          echo "SRC_CONTENT=$(echo \"$(ls -R src)\")" >> $GITHUB_ENV
+          export SRC_CONTENT_ENV=$(echo \"$(ls -R src)\")
 
       - name: Update toml
         run: |
-          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.COMMON_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
           sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-common'"${{ env.COMMON_VERSION_UNDERSCORE }}"'/g' README.md
+          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"''"${{ env.PKG_VERSION_UNDERSCORE }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
 
       - name: Upload to PyPI TEST
         run: |
           cd src
-          poetry config repositories.test https://test.pypi.org/legacy/
-          poetry config http-basic.test ${{ secrets.POETRY_PYPI_TOKEN_USERNAME }} ${{ secrets.POETRY_TEST_PYPI_TOKEN_PASSWORD }}
-          poetry publish --repository test
+          poetry config pypi-token.pypi ${{ secrets.POETRY_PYPI_TOKEN_PASSWORD }}
+          poetry publish --repository test-pypi

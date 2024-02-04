@@ -41,7 +41,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.9"
-xsdata = {version = "^24.0"}
+xsdata = {version = "^24.0", extras = ["cli"]}
 #<PROJECT_DEPS>
 
 [tool.poetry.dev-dependencies]

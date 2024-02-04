@@ -2,10 +2,11 @@
 ## Copyright (c) 2022-2023 Geosiris.
 ## SPDX-License-Identifier: Apache-2.0
 ##
-#        xsd-link: ["http://geosiris.com/wp-content/uploads/2022/09/opc.zip"]
-name: OPC pypi-test
+name: OPC pypi
 
-on: [pull_request]
+on:
+  release:
+    types: [created]
 
 env:
   PKG_NAME: opc
