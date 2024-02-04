@@ -60,13 +60,26 @@ env:
 
 jobs:
 
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: set-matrix
+        run: |
+          matrix=${{ fromJSON(env.energyml-configuration) }}
+          echo "::set-output name=matrix::$matrix"
+
   common-xsd-download:
     name: Download common packages
     runs-on: ubuntu-latest
+    needs: matrix
 
     strategy:
       matrix:
-        xsd-link: ${{ fromJSON(env.energyml-configuration)["common"]["urls"] }}
+        xsd-link: ${{ fromJSON(needs.matrix.outputs.matrix)["common"]["urls"] }}
 
     steps:
 
@@ -107,12 +120,12 @@ jobs:
 
   build:
     name: Build $PKG_NAME package
-    needs: [common-xsd-download]
+    needs: [matrix, common-xsd-download]
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        module-json: ${{ fromJSON(env.energyml-configuration)["modules"] }}
+        module-json: ${{ fromJSON(needs.matrix.outputs.matrix)["modules"] }}
 
     steps:
 
@@ -180,12 +193,12 @@ jobs:
 
   publish:
     name: Publish to PyPI
-    needs: [build]
+    needs: [matrix, build]
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        module-json: ${{ fromJSON(env.energyml-configuration)["modules"] }}
+        module-json: ${{ fromJSON(needs.matrix.outputs.matrix)["modules"] }}
 
     steps:
 
