@@ -293,6 +293,9 @@ if __name__ == "__main__":
         print(serializer.render(obj))
         print(obj.validate())
 """
+# poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations .\sample\xsd\common\v2.3\xsd_schemas\
+# poetry run rename_pkgs --common 2.3 --src gen -o energyml 
+
 # poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations .\sample\xsd\opc\opc-all.xsd
 # poetry run xsdata generate -ss namespace-clusters -p gen --postponed-annotations .\sample\xsd\resqml\v2.2\xsd_schemas\
 # poetry run rename_pkgs --common 2.3 --resqml 2.2 --src gen -o gen2
