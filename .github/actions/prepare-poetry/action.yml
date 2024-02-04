@@ -40,16 +40,18 @@ runs:
         python -m pip install --upgrade pip
         pip install poetry-dynamic-versioning
       shell: bash
-      
     - name: Load cached venv
       id: cached-poetry-dependencies
       uses: actions/cache@v4
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}-1
-     
+
     - name: Install dependencies and library
       # if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       run: poetry install --no-interaction
       shell: bash
-  
+
+    - name: Install Poetry Plugins
+      run: poetry self add "poetry-dynamic-versioning[plugin]"
+      shell: bash

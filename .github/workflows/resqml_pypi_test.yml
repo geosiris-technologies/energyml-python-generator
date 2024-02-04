@@ -202,6 +202,7 @@ jobs:
       - name: Upload to PyPI TEST
         run: |
           cd src
+          poetry self add "poetry-dynamic-versioning[plugin]"
           poetry config repositories.test-pypi https://test.pypi.org/legacy/
           poetry config pypi-token.test-pypi ${{ secrets.POETRY_PYPI_TEST_TOKEN_VALUE }}
           poetry publish --repository test-pypi
