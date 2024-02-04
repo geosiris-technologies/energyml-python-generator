@@ -1,0 +1,220 @@
+##
+## Copyright (c) 2022-2023 Geosiris.
+## SPDX-License-Identifier: Apache-2.0
+##
+name: Energyml Packages prodml/resqml/witsml
+
+on: [pull_request]
+
+env:
+  energyml-configuration: '{
+    "common":
+    {
+        "urls":
+        [
+            "http://geosiris.com/wp-content/uploads/2022/09/common_v2.0.zip",
+            "http://geosiris.com/wp-content/uploads/2022/09/common_v2.1.zip",
+            "http://geosiris.com/wp-content/uploads/2022/09/common_v2.2.zip",
+            "http://geosiris.com/wp-content/uploads/2022/09/common_v2.3.zip"
+        ]
+    },
+    "modules":
+    [
+        {
+            "common_version": "2.1",
+            "pkg_name": "prodml",
+            "url": "http://geosiris.com/wp-content/uploads/2022/09/prodml_v2.0.zip"
+        },
+        {
+            "common_version": "2.3",
+            "pkg_name": "prodml",
+            "url": "http://geosiris.com/wp-content/uploads/2022/09/prodml_v2.2.zip"
+        },
+        {
+            "common_version": "2.0",
+            "pkg_name": "resqml",
+            "url": "http://geosiris.com/wp-content/uploads/2022/09/resqml_v2.0.1.zip"
+        },
+        {
+            "common_version": "2.3",
+            "pkg_name": "resqml",
+            "url": "http://geosiris.com/wp-content/uploads/2022/09/resqml_v2.2_dev3.zip"
+        },
+        {
+            "common_version": "2.2",
+            "pkg_name": "resqml",
+            "url": "http://geosiris.com/wp-content/uploads/2022/09/resqml_v2.2.zip"
+        },
+        {
+            "common_version": "2.1",
+            "pkg_name": "witsml",
+            "url": "http://geosiris.com/wp-content/uploads/2022/09/witsml_v2.0.zip"
+        },
+        {
+            "common_version": "2.3",
+            "pkg_name": "witsml",
+            "url": "http://geosiris.com/wp-content/uploads/2022/09/witsml_v2.1.zip"
+        }
+    ]
+}'
+
+jobs:
+
+  common-xsd-download:
+    name: Download common packages
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        xsd-link: ${{ fromJSON(env.energyml-configuration)["common"]["urls"] }}
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install poetry
+        uses: ./.github/actions/prepare-poetry
+        with:
+          python-version: 3.9
+
+      - name: Compute env variables
+        uses: ./.github/actions/compute-env-variables
+        with:
+          xsd-url: ${{ matrix.xsd-link }}
+          pkg-name: common
+
+      - name: Generate python classes
+        uses: ./.github/actions/xsdata-generation
+        with:
+          xsd-url: ${{ matrix.xsd-link }}
+          pkg-name: common
+          version-common: ${{ env.PKG_VERSION }}
+          download-only: true
+
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-artifact-common-${{ env.PKG_VERSION_UNDERSCORE }}
+          path: xsd/
+
+  build:
+    name: Build $PKG_NAME package
+    needs: [common-xsd-download]
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        module-json: ${{ fromJSON(env.energyml-configuration)["modules"] }}
+
+    steps:
+
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dist-artifact-common-*
+          merge-multiple: true
+          path: xsd/
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install poetry
+        uses: ./.github/actions/prepare-poetry
+        with:
+          python-version: 3.9
+
+      - name: Compute env variables
+        uses: ./.github/actions/compute-env-variables
+        with:
+          xsd-url: ${{ fromJSON(matrix.module-json)["url"] }}
+          pkg-name: ${{ fromJSON(matrix.module-json)["pkg_name"] }}
+
+      - name: Generate python classes
+        uses: ./.github/actions/xsdata-generation
+        with:
+          xsd-url: ${{ fromJSON(matrix.module-json)["url"] }}
+          pkg-name: ${{ env.PKG_NAME }}
+          version-common: ${{ fromJSON(matrix.module-json)["common_version"] }}
+          version-prodml: ${{ env.PKG_VERSION }}
+
+      - name: Update toml
+        run: |
+          export COMMON_VERSION_UNDERSCORE=$( echo ${{ fromJSON(matrix.module-json)["common_version"] }} | sed -r 's/\./_/g')
+          
+          sed -i 's/#\s*<PROJECT_DEPS>/energyml-common'"$COMMON_VERSION_UNDERSCORE"' = "^1.0.0"/g' src/pyproject.toml
+          sed -i 's/<PROJECT_SRC_FOLDER>/'"${{ env.MODULE_NAME }}"'/g' src/pyproject.toml
+          
+          sed -i 's/<PROJECT_NAME>/'"${{ env.MODULE_NAME }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_NAME>/'"${{ env.MODULE_NAME }}"'/g' README.md
+          
+          cp README.md src/
+          cp LICENSE src/
+
+      - name: build
+        run: |
+          cd src
+          poetry install
+          poetry self add "poetry-dynamic-versioning[plugin]"
+          poetry build
+
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-artifact-${{ env.PKG_NAME }}-${{ env.PKG_VERSION_UNDERSCORE }}
+          path: src/
+
+  publish:
+    name: Publish to PyPI
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        module-json: ${{ fromJSON(env.energyml-configuration)["modules"] }}
+
+    steps:
+
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-artifact-${{ env.PKG_NAME }}-${{ env.PKG_VERSION_UNDERSCORE }}
+          path: src/
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      # Retrieve the code and GIT history so that poetry-dynamic-versioning knows which version to upload
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install poetry
+        uses: ./.github/actions/prepare-poetry
+        with:
+          python-version: 3.9
+
+      - name: Upload to PyPI TEST
+        run: |
+          cd src
+          poetry self add "poetry-dynamic-versioning[plugin]"
+          poetry config repositories.test-pypi https://test.pypi.org/legacy/
+          poetry config pypi-token.test-pypi ${{ secrets.POETRY_PYPI_TEST_TOKEN_VALUE }}
+          poetry publish --repository test-pypi
