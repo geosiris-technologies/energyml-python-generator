@@ -158,20 +158,20 @@ jobs:
       - name: Compute env variables
         uses: ./.github/actions/compute-env-variables
         with:
-          xsd-url: ${{ fromJSON(matrix.module-json).url }}
-          pkg-name: ${{ fromJSON(matrix.module-json).pkg_name }}
+          xsd-url: ${{ matrix.module-json.url }}
+          pkg-name: ${{ matrix.module-json.pkg_name }}
 
       - name: Generate python classes
         uses: ./.github/actions/xsdata-generation
         with:
-          xsd-url: ${{ fromJSON(matrix.module-json).url }}
+          xsd-url: ${{ matrix.module-json.url }}
           pkg-name: ${{ env.PKG_NAME }}
-          version-common: ${{ fromJSON(matrix.module-json).common_version }}
+          version-common: ${{ matrix.module-json.common_version }}
           version-prodml: ${{ env.PKG_VERSION }}
 
       - name: Update toml
         run: |
-          export COMMON_VERSION_UNDERSCORE=$( echo ${{ fromJSON(matrix.module-json).common_version }} | sed -r 's/\./_/g')
+          export COMMON_VERSION_UNDERSCORE=$( echo ${{ matrix.module-json.common_version }} | sed -r 's/\./_/g')
           
           sed -i 's/#\s*<PROJECT_DEPS>/energyml-common'"$COMMON_VERSION_UNDERSCORE"' = "^1.0.0"/g' src/pyproject.toml
           sed -i 's/<PROJECT_SRC_FOLDER>/'"${{ env.MODULE_NAME }}"'/g' src/pyproject.toml
