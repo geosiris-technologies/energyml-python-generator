@@ -70,10 +70,10 @@ jobs:
 
       - id: set-matrix
         run: |
-          export commons=$(echo "${{ toJSON(fromJSON(env.energyml-configuration).common.urls) }}" | tr -d '\n')
+          export commons=$(echo '${{ toJSON(fromJSON(env.energyml-configuration).common.urls) }}' | tr -d '\n')
           echo "commons=$commons" >> "$GITHUB_OUTPUT"
           
-          export modules=$(echo "${{ toJSON(fromJSON(env.energyml-configuration).modules) }}" | tr -d '\n')
+          export modules=$(echo '${{ toJSON(fromJSON(env.energyml-configuration).modules) }}' | tr -d '\n')
           echo "modules=$modules" >> "$GITHUB_OUTPUT"
 
   common-xsd-download:
