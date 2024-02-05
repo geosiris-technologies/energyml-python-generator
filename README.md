@@ -18,12 +18,18 @@ Installation
 
 Multiple projects are generated: 
 
-- resqml22
-- resqml201
-- resqml22dev3
-- witml20
-- witsml21
-- prodml22
+- energyml-opc
+- energyml-common2-0
+- energyml-common2-1
+- energyml-common2-2
+- energyml-common2-3
+- energyml-resqml2-2
+- energyml-resqml2-0-1
+- energyml-resqml2-2-dev3
+- energyml-witml2-0
+- energyml-witsml2-1
+- energyml-prodml2-0
+- energyml-prodml2-2
 
 Energyml-types can be installed with pip : 
 
