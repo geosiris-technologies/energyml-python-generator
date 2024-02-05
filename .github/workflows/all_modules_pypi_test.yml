@@ -206,6 +206,18 @@ jobs:
 
     steps:
 
+      # Retrieve the code and GIT history so that poetry-dynamic-versioning knows which version to upload
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute env variables
+        uses: ./.github/actions/compute-env-variables
+        with:
+          xsd-url: ${{ matrix.module-json.url }}
+          pkg-name: ${{ matrix.module-json.pkg_name }}
+
       - name: Get build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -216,12 +228,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.9'
-
-      # Retrieve the code and GIT history so that poetry-dynamic-versioning knows which version to upload
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Install poetry
         uses: ./.github/actions/prepare-poetry
