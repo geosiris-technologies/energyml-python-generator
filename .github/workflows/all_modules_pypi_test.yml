@@ -123,7 +123,7 @@ jobs:
           path: xsd/
 
   build:
-    name: Build $PKG_NAME package
+    name: Build energyml packages
     needs: [matrix, common-xsd-download]
     runs-on: ubuntu-latest
 
@@ -165,7 +165,7 @@ jobs:
         uses: ./.github/actions/xsdata-generation
         with:
           xsd-url: ${{ matrix.module-json.url }}
-          pkg-name: ${{ env.PKG_NAME }}
+          pkg-name: ${{ matrix.module-json.pkg_name }}
           version-common: ${{ matrix.module-json.common_version }}
           version-prodml: ${{ env.PKG_VERSION }}
 
@@ -192,7 +192,7 @@ jobs:
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-artifact-${{ env.PKG_NAME }}-${{ env.PKG_VERSION_UNDERSCORE }}
+          name: dist-artifact-${{ matrix.module-json.pkg_name }}-${{ env.PKG_VERSION_UNDERSCORE }}
           path: src/
 
   publish:
@@ -209,7 +209,7 @@ jobs:
       - name: Get build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: dist-artifact-${{ env.PKG_NAME }}-${{ env.PKG_VERSION_UNDERSCORE }}
+          name: dist-artifact-${{ matrix.module-json.pkg_name }}-${{ env.PKG_VERSION_UNDERSCORE }}
           path: src/
 
       - name: Set up Python
