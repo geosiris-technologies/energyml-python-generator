@@ -108,13 +108,13 @@ runs:
           fi
         done
         
-        mv generated src/${{ env.MODULE_NAME }}
+        mv generated src/${{ env.MODULE_FOLDER }}
 
     - name: Create __init__ files
       if: ${{ inputs.download-only == 'false' }}
       shell: bash
       run: |
-        for folder in $(find src/${{ env.MODULE_NAME }} -type d); do
+        for folder in $(find src/${{ env.MODULE_FOLDER }} -type d); do
           touch "$folder"/__init__.py;
         done
 
