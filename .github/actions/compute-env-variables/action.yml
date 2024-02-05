@@ -25,6 +25,10 @@ runs:
       shell: bash
       run: |
         export PKG_VERSION="$(echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g')"
+#        for zip without version (likle  '.../opc.zip')
+        if [[ $PKG_VERSION == http* ]];then
+            export PKG_VERSION="";
+        fi
         export PKG_VERSION_UNDERSCORE="$(echo $PKG_VERSION | sed -r 's/\./_/g')"
         
         # export variable to github env

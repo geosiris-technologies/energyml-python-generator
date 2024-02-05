@@ -92,10 +92,16 @@ jobs:
 
     steps:
 
+      - name: Compute env variables
+        uses: ./.github/actions/compute-env-variables
+        with:
+          xsd-url: ${{ matrix.xsd-link }}
+          pkg-name: ${{ env.PKG_NAME }}
+
       - name: Get build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: dist-artifact
+          name: dist-artifact-${{ env.PKG_VERSION_UNDERSCORE }}
           path: src/
 
       - name: Set up Python
