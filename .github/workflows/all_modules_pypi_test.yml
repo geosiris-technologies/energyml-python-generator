@@ -167,7 +167,9 @@ jobs:
           xsd-url: ${{ matrix.module-json.url }}
           pkg-name: ${{ matrix.module-json.pkg_name }}
           version-common: ${{ matrix.module-json.common_version }}
-          version-prodml: ${{ env.PKG_VERSION }}
+          version-prodml: $(if [ $PKG_VERSION="prodml" ]; then echo "${{ env.PKG_VERSION }}"; else echo ""; fi)
+          version-resqml: $(if [ $PKG_VERSION="resqml" ]; then echo "${{ env.PKG_VERSION }}"; else echo ""; fi)
+          version-witsml: $(if [ $PKG_VERSION="witsml" ]; then echo "${{ env.PKG_VERSION }}"; else echo ""; fi)
 
       - name: Update toml
         run: |
