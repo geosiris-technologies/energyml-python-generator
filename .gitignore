@@ -47,5 +47,5 @@ requirements.txt
 doc/
 sample/
 gen*/
-energyml
+energyml-local/
 src/*.lock

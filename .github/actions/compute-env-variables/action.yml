@@ -36,3 +36,4 @@ runs:
         echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
         echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
         echo "MODULE_NAME=energyml_${{ inputs.pkg-name }}$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
+        echo "MODULE_FOLDER=energyml" >> $GITHUB_ENV

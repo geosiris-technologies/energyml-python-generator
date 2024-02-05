@@ -57,11 +57,13 @@ jobs:
       - name: Update toml
         run: |
           sed -i 's/<PROJECT_NAME>/'"${{ env.MODULE_NAME }}"'/g' src/pyproject.toml
-          sed -i 's/<PROJECT_SRC_FOLDER>/'"${{ env.MODULE_NAME }}"'/g' src/pyproject.toml
+          sed -i 's/<PROJECT_SRC_FOLDER>/'"${{ env.MODULE_FOLDER }}"'/g' src/pyproject.toml
           sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
           sed -i 's/<PROJECT_NAME>/'"${{ env.MODULE_NAME }}"'/g' README.md
-          cp README.md src/
-          cp LICENSE src/
+          
+          export GENERATED_FILES=$(echo "$(find src/${{ env.MODULE_FOLDER }} | grep -v __init__.py | grep .py | sed -r 's/^[^\/]+\///g' )")
+          # awk -v r=$GENERATED_FILES '{gsub(/<GENERATED_FILES>/,r)}1' src/README.md > src/README_new.md && mv src/README_new.md src/README.md
+          echo $GENERATED_FILES >> src/README.md
 
       - name: build
         run: |
