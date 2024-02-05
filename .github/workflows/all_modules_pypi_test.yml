@@ -71,10 +71,10 @@ jobs:
       - id: set-matrix
         run: |
           commons=$(echo "${{ fromJSON(env.energyml-configuration).common.urls }}")
-          echo "::set-output name=commons-urls::commons"
+          echo "commons-urls=$commons" >> "$GITHUB_OUTPUT"
           
           modules=$(echo "${{ fromJSON(env.energyml-configuration) }}.modules")
-          echo "::set-output name=modules::modules"
+          echo "modules=$modules" >> "$GITHUB_OUTPUT"
 
   common-xsd-download:
     name: Download common packages
