@@ -73,7 +73,7 @@ jobs:
           commons=$(echo "${{ fromJSON(env.energyml-configuration).common.urls }}")
           echo "commons=$commons" >> "$GITHUB_OUTPUT"
           
-          modules=$(echo "${{ fromJSON(env.energyml-configuration) }}.modules")
+          modules=$(echo "${{ fromJSON(env.energyml-configuration).modules }}")
           echo "modules=$modules" >> "$GITHUB_OUTPUT"
 
   common-xsd-download:
@@ -83,7 +83,7 @@ jobs:
 
     strategy:
       matrix:
-        xsd-link: ${{ fromJSON(env.energyml-configuration).common.urls) }}
+        xsd-link: ${{ fromJSON(needs.matrix.outputs.commons-urls) }}
 
     steps:
 
@@ -129,7 +129,7 @@ jobs:
 
     strategy:
       matrix:
-        module-json: ${{ fromJSON(env.energyml-configuration).modules) }}
+        module-json: ${{ fromJSON(needs.matrix.outputs.modules) }}
 
     steps:
 
@@ -202,7 +202,7 @@ jobs:
 
     strategy:
       matrix:
-        module-json: ${{ fromJSON(env.energyml-configuration).modules) }}
+        module-json: ${{ fromJSON(needs.matrix.outputs.modules) }}
 
     steps:
 
