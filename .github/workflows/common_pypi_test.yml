@@ -59,7 +59,7 @@ jobs:
           sed -i 's/<PROJECT_NAME>/'"${{ env.MODULE_NAME }}"'/g' src/pyproject.toml
           sed -i 's/<PROJECT_SRC_FOLDER>/'"${{ env.MODULE_NAME }}"'/g' src/pyproject.toml
           sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/'"${{ env.MODULE_NAME }}"'"'/g' README.md
+          sed -i 's/<PROJECT_NAME>/'"${{ env.MODULE_NAME }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
 

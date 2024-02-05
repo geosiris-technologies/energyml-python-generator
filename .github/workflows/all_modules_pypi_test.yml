@@ -63,7 +63,7 @@ jobs:
   matrix:
     runs-on: ubuntu-latest
     outputs:
-      commons-urls: ${{ steps.set-matrix.outputs.commons-urls }}
+      commons-urls: ${{ steps.set-matrix.outputs.commons }}
       modules: ${{ steps.set-matrix.outputs.modules }}
     steps:
       - uses: actions/checkout@v2
@@ -71,7 +71,7 @@ jobs:
       - id: set-matrix
         run: |
           commons=$(echo "${{ fromJSON(env.energyml-configuration).common.urls }}")
-          echo "commons-urls=$commons" >> "$GITHUB_OUTPUT"
+          echo "commons=$commons" >> "$GITHUB_OUTPUT"
           
           modules=$(echo "${{ fromJSON(env.energyml-configuration) }}.modules")
           echo "modules=$modules" >> "$GITHUB_OUTPUT"
