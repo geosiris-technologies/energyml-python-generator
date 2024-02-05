@@ -44,17 +44,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-
-    - name: Compute version env
-      shell: bash
-      run: |
-        export PKG_VERSION="$(echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g')"
-        export PKG_VERSION_UNDERSCORE="$(echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
-        
-        # export variable to github env          
-        echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
-        echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
-
     - name: Download ${{ inputs.pkg-name }} xsd zip ${{ inputs.pkg-name }}
       shell: bash
       run : wget ${{ inputs.xsd-url }} -P ${{ github.workspace }}
@@ -93,7 +82,7 @@ runs:
         export ARGS_VERSION=$(if [ -n "${{ inputs.version-prodml }}" ]; then echo "$ARGS_VERSION --prodml ${{ inputs.version-prodml }}"; else echo "$ARGS_VERSION"; fi)
         echo $ARGS_VERSION
 
-        poetry run rename_pkgs $ARGS_VERSION --src gen -o energyml
+        poetry run rename_pkgs $ARGS_VERSION --src gen -o generated
 
     - name: Move only the appropriate module in src folder
       if: ${{ inputs.download-only == 'false' }}
@@ -110,7 +99,7 @@ runs:
             fi
         }
                 
-        for f in $(ls energyml); do
+        for f in $(ls generated); do
           if folder_match_pkg ${{ inputs.pkg-name }} $f;
           then echo "$f kept";
           else 
@@ -119,7 +108,15 @@ runs:
           fi
         done
         
-        mv energyml src/energyml
+        mv generated src/${{ env.MODULE_NAME }}
+
+    - name: Create __init__ files
+      if: ${{ inputs.download-only == 'false' }}
+      shell: bash
+      run: |
+        for folder in $(find src/${{ env.MODULE_NAME }} -type d); do
+          touch "$folder"/__init__.py;
+        done
 
     - name: Cleaning
       if: ${{ inputs.download-only == 'false' }}

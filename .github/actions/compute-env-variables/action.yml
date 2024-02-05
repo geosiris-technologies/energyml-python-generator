@@ -1,0 +1,38 @@
+##
+## Copyright (c) 2022-2023 Geosiris.
+## SPDX-License-Identifier: Apache-2.0
+##
+---
+
+name: Env definition
+description: Compute usefull environment variables
+
+inputs:
+  
+  xsd-url:  
+    description: 'Url of the zip that contains the xsd files'
+    required: true
+  
+  pkg-name:
+    description: 'name of the package to generate (common|resqml|witsml|prodml|opc)'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Compute version env
+      shell: bash
+      run: |
+        export PKG_VERSION="$(echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g')"
+        
+        # for zip without version (like  '.../opc.zip')
+        if [[ $PKG_VERSION == http* ]];then
+            export PKG_VERSION="";
+        fi
+        export PKG_VERSION_UNDERSCORE="$(echo $PKG_VERSION | sed -r 's/\./_/g')"
+        
+        # export variable to github env
+        echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+        echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
+        echo "MODULE_NAME=energyml_${{ inputs.pkg-name }}$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV

@@ -20,6 +20,7 @@ jobs:
     strategy:
       matrix:
         xsd-link: ["http://geosiris.com/wp-content/uploads/2022/09/opc.zip"]
+
     steps:
 
       - name: Checkout code
@@ -36,6 +37,12 @@ jobs:
         uses: ./.github/actions/prepare-poetry
         with:
           python-version: 3.9
+
+      - name: Compute env variables
+        uses: ./.github/actions/compute-env-variables
+        with:
+          xsd-url: ${{ matrix.xsd-link }}
+          pkg-name: ${{ env.PKG_NAME }}
 
       - name: Generate python classes
         uses: ./.github/actions/xsdata-generation
@@ -64,7 +71,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist-artifact
-          path: src/dist/
+          path: src/
 
   publish:
     name: Publish to PyPI
@@ -77,6 +84,12 @@ jobs:
 
     steps:
 
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-artifact
+          path: src/
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -88,31 +101,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dist-artifact
-          path: src/dist/
-
       - name: Install poetry
         uses: ./.github/actions/prepare-poetry
         with:
           python-version: 3.9
-
-      - name: Compute version env
-        shell: bash
-        run: |
-          echo "SRC_CONTENT=$(echo \"$(ls -R src)\")" >> $GITHUB_ENV
-          export SRC_CONTENT_ENV=$(echo \"$(ls -R src)\")
-
-      - name: Update toml
-        run: |
-          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"'/g' src/pyproject.toml
-          sed -i 's/<PROJECT_SRC_FOLDER>/energyml/g' src/pyproject.toml
-          sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/energyml-'"${{ env.PKG_NAME }}"'/g' README.md
-          cp README.md src/
-          cp LICENSE src/
 
       - name: Upload to PyPI TEST
         run: |
