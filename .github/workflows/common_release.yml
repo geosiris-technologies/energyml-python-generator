@@ -8,6 +8,9 @@ on:
   release:
     types: [created]
 
+env:
+  PKG_NAME: common
+
 jobs:
 
   build:
@@ -58,7 +61,7 @@ jobs:
           sed -i 's/<PROJECT_NAME>/'"${{ env.MODULE_NAME }}"'/g' src/pyproject.toml
           sed -i 's/<PROJECT_SRC_FOLDER>/'"${{ env.MODULE_NAME }}"'/g' src/pyproject.toml
           sed -i 's/#\s*<PROJECT_DEPS>//g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/'"${{ env.MODULE_NAME }}"'"'/g' README.md
+          sed -i 's/<PROJECT_NAME>/'"${{ env.MODULE_NAME }}"'/g' README.md
           cp README.md src/
           cp LICENSE src/
 
@@ -91,22 +94,28 @@ jobs:
 
     steps:
 
+      # Retrieve the code and GIT history so that poetry-dynamic-versioning knows which version to upload
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute env variables
+        uses: ./.github/actions/compute-env-variables
+        with:
+          xsd-url: ${{ matrix.xsd-link }}
+          pkg-name: ${{ env.PKG_NAME }}
+
       - name: Get build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: dist-artifact
+          name: dist-artifact-${{ env.PKG_VERSION_UNDERSCORE }}
           path: src/
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.9'
-
-      # Retrieve the code and GIT history so that poetry-dynamic-versioning knows which version to upload
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Install poetry
         uses: ./.github/actions/prepare-poetry

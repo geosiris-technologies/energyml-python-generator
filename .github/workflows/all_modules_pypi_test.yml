@@ -2,7 +2,7 @@
 ## Copyright (c) 2022-2023 Geosiris.
 ## SPDX-License-Identifier: Apache-2.0
 ##
-name: Energyml Packages prodml/resqml/witsml
+name: Energyml Packages prodml/resqml/witsml (pypi test)
 
 on: [pull_request]
 

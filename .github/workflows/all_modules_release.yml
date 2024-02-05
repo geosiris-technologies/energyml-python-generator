@@ -62,13 +62,30 @@ env:
 
 jobs:
 
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      commons: ${{ steps.set-matrix.outputs.commons }}
+      modules: ${{ steps.set-matrix.outputs.modules }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: set-matrix
+        run: |
+          export commons=$(echo '${{ toJSON(fromJSON(env.energyml-configuration).common.urls) }}' | tr -d '\n')
+          echo "commons=$commons" >> "$GITHUB_OUTPUT"
+          
+          export modules=$(echo '${{ toJSON(fromJSON(env.energyml-configuration).modules) }}' | tr -d '\n')
+          echo "modules=$modules" >> "$GITHUB_OUTPUT"
+
   common-xsd-download:
     name: Download common packages
     runs-on: ubuntu-latest
+    needs: matrix
 
     strategy:
       matrix:
-        xsd-link: ${{ fromJSON(env.energyml-configuration)["common"]["urls"] }}
+        xsd-link: ${{ fromJSON(needs.matrix.outputs.commons) }}
 
     steps:
 
@@ -108,13 +125,13 @@ jobs:
           path: xsd/
 
   build:
-    name: Build $PKG_NAME package
-    needs: [common-xsd-download]
+    name: Build energyml packages
+    needs: [matrix, common-xsd-download]
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        module-json: ${{ fromJSON(env.energyml-configuration)["modules"] }}
+        module-json: ${{ fromJSON(needs.matrix.outputs.modules) }}
 
     steps:
 
@@ -143,20 +160,20 @@ jobs:
       - name: Compute env variables
         uses: ./.github/actions/compute-env-variables
         with:
-          xsd-url: ${{ fromJSON(matrix.module-json)["url"] }}
-          pkg-name: ${{ fromJSON(matrix.module-json)["pkg_name"] }}
+          xsd-url: ${{ matrix.module-json.url }}
+          pkg-name: ${{ matrix.module-json.pkg_name }}
 
       - name: Generate python classes
         uses: ./.github/actions/xsdata-generation
         with:
-          xsd-url: ${{ fromJSON(matrix.module-json)["url"] }}
-          pkg-name: ${{ env.PKG_NAME }}
-          version-common: ${{ fromJSON(matrix.module-json)["common_version"] }}
+          xsd-url: ${{ matrix.module-json.url }}
+          pkg-name: ${{ matrix.module-json.pkg_name }}
+          version-common: ${{ matrix.module-json.common_version }}
           version-prodml: ${{ env.PKG_VERSION }}
 
       - name: Update toml
         run: |
-          export COMMON_VERSION_UNDERSCORE=$( echo ${{ fromJSON(matrix.module-json)["common_version"] }} | sed -r 's/\./_/g')
+          export COMMON_VERSION_UNDERSCORE=$( echo ${{ matrix.module-json.common_version }} | sed -r 's/\./_/g')
           
           sed -i 's/#\s*<PROJECT_DEPS>/energyml-common'"$COMMON_VERSION_UNDERSCORE"' = "^1.0.0"/g' src/pyproject.toml
           sed -i 's/<PROJECT_SRC_FOLDER>/'"${{ env.MODULE_NAME }}"'/g' src/pyproject.toml
@@ -177,36 +194,42 @@ jobs:
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-artifact-${{ env.PKG_NAME }}-${{ env.PKG_VERSION_UNDERSCORE }}
+          name: dist-artifact-${{ matrix.module-json.pkg_name }}-${{ env.PKG_VERSION_UNDERSCORE }}
           path: src/
 
   publish:
     name: Publish to PyPI
-    needs: [build]
+    needs: [matrix, build]
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        module-json: ${{ fromJSON(env.energyml-configuration)["modules"] }}
+        module-json: ${{ fromJSON(needs.matrix.outputs.modules) }}
 
     steps:
-
-      - name: Get build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dist-artifact-${{ env.PKG_NAME }}-${{ env.PKG_VERSION_UNDERSCORE }}
-          path: src/
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
 
       # Retrieve the code and GIT history so that poetry-dynamic-versioning knows which version to upload
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Compute env variables
+        uses: ./.github/actions/compute-env-variables
+        with:
+          xsd-url: ${{ matrix.module-json.url }}
+          pkg-name: ${{ matrix.module-json.pkg_name }}
+
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-artifact-${{ matrix.module-json.pkg_name }}-${{ env.PKG_VERSION_UNDERSCORE }}
+          path: src/
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
 
       - name: Install poetry
         uses: ./.github/actions/prepare-poetry
