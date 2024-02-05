@@ -83,7 +83,7 @@ jobs:
 
     strategy:
       matrix:
-        xsd-link: ${{ fromJSON($energyml-configuration).common.urls) }}
+        xsd-link: ${{ fromJSON(energyml-configuration).common.urls) }}
 
     steps:
 
@@ -129,7 +129,7 @@ jobs:
 
     strategy:
       matrix:
-        module-json: ${{ fromJSON($energyml-configuration).modules) }}
+        module-json: ${{ fromJSON(energyml-configuration).modules) }}
 
     steps:
 
@@ -202,7 +202,7 @@ jobs:
 
     strategy:
       matrix:
-        module-json: ${{ fromJSON($energyml-configuration).modules) }}
+        module-json: ${{ fromJSON(energyml-configuration).modules) }}
 
     steps:
 

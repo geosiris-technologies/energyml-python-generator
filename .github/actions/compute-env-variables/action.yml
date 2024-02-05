@@ -25,7 +25,7 @@ runs:
       shell: bash
       run: |
         export PKG_VERSION="$(echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g')"
-#        for zip without version (likle  '.../opc.zip')
+        # for zip without version (like  '.../opc.zip')
         if [[ $PKG_VERSION == http* ]];then
             export PKG_VERSION="";
         fi
