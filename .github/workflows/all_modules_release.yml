@@ -169,7 +169,9 @@ jobs:
           xsd-url: ${{ matrix.module-json.url }}
           pkg-name: ${{ matrix.module-json.pkg_name }}
           version-common: ${{ matrix.module-json.common_version }}
-          version-prodml: ${{ env.PKG_VERSION }}
+          version-prodml: $(if [ $PKG_VERSION="prodml" ]; then echo "${{ env.PKG_VERSION }}"; else echo ""; fi)
+          version-resqml: $(if [ $PKG_VERSION="resqml" ]; then echo "${{ env.PKG_VERSION }}"; else echo ""; fi)
+          version-witsml: $(if [ $PKG_VERSION="witsml" ]; then echo "${{ env.PKG_VERSION }}"; else echo ""; fi)
 
       - name: Update toml
         run: |
@@ -177,14 +179,15 @@ jobs:
           
           sed -i 's/#\s*<PROJECT_DEPS>/energyml-common'"$COMMON_VERSION_UNDERSCORE"' = "^1.0.0"/g' src/pyproject.toml
           sed -i 's/<PROJECT_SRC_FOLDER>/'"${{ env.MODULE_FOLDER }}"'/g' src/pyproject.toml
-          
           sed -i 's/<PROJECT_NAME>/'"${{ env.MODULE_NAME }}"'/g' src/pyproject.toml
-          sed -i 's/<PROJECT_NAME>/'"${{ env.MODULE_NAME }}"'/g' README.md
+          
+          sed -i 's/<PROJECT_NAME>/'"${{ env.MODULE_NAME }}"'/g' src/README.md
           
           export GENERATED_FILES=$(echo "$(find src/${{ env.MODULE_FOLDER }} | grep -v __init__.py | grep .py | sed -r 's/^[^\/]+\///g' )")
           # awk -v r=$GENERATED_FILES '{gsub(/<GENERATED_FILES>/,r)}1' src/README.md > src/README_new.md && mv src/README_new.md src/README.md
           echo $GENERATED_FILES >> src/README.md
-          
+
+
       - name: build
         run: |
           cd src
