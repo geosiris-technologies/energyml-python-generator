@@ -31,4 +31,3 @@ poetry add <PROJECT_NAME>
 Content of the module
 ---
 
-<GENERATED_FILES>
