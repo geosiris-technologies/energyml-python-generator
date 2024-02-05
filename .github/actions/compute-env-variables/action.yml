@@ -25,9 +25,9 @@ runs:
       shell: bash
       run: |
         export PKG_VERSION="$(echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g')"
-        export PKG_VERSION_UNDERSCORE="$(echo ${{ inputs.xsd-url }} | sed -r 's/.*_v(.*).zip$/\1/g' | sed -r 's/\./_/g')"
+        export PKG_VERSION_UNDERSCORE="$(echo $PKG_VERSION | sed -r 's/\./_/g')"
         
-        # export variable to github env          
+        # export variable to github env
         echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
         echo "PKG_VERSION_UNDERSCORE=$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
         echo "MODULE_NAME=energyml-${{ inputs.pkg-name }}$PKG_VERSION_UNDERSCORE" >> $GITHUB_ENV
