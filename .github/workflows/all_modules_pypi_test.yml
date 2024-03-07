@@ -133,6 +133,21 @@ jobs:
 
     steps:
 
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install poetry
+        uses: ./.github/actions/prepare-poetry
+        with:
+          python-version: 3.9
+
       - name: Get build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -153,21 +168,6 @@ jobs:
           echo "::debug::listing pwd folder"
           ls -R .
           echo `ls -R .`
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
-
-      - name: Install poetry
-        uses: ./.github/actions/prepare-poetry
-        with:
-          python-version: 3.9
 
       - name: Compute env variables
         uses: ./.github/actions/compute-env-variables
