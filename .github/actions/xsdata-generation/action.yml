@@ -63,7 +63,10 @@ runs:
 
     - name: Display xsd folder
       shell: bash
-      run: ls -R xsd/
+      run: |
+        echo "::debug::listing xsd folder"
+        ls -R xsd
+        echo `ls -R xsd`
 
     - name: Generate
       if: ${{ inputs.download-only == 'false' }}

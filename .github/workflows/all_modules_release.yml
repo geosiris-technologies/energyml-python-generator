@@ -144,7 +144,10 @@ jobs:
 
       - name: Display structure of downloaded files
         shell: bash
-        run: ls -R path/to/artifacts
+        run: |
+          echo "::debug::listing xsd folder"
+          ls -R xsd
+          echo `ls -R xsd`
 
       - name: Checkout code
         uses: actions/checkout@v4
