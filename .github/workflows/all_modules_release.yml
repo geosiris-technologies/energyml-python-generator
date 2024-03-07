@@ -143,6 +143,7 @@ jobs:
           path: xsd/
 
       - name: Display structure of downloaded files
+        shell: bash
         run: ls -R path/to/artifacts
 
       - name: Checkout code

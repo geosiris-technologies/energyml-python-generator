@@ -62,6 +62,7 @@ runs:
         done
 
     - name: Display xsd folder
+      shell: bash
       run: ls -R xsd/
 
     - name: Generate
