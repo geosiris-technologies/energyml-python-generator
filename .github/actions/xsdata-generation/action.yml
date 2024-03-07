@@ -112,7 +112,7 @@ runs:
           then echo "$f kept";
           else 
             echo "removing $f";
-            rm -rf $f;
+            rm -rf generated/$f;
           fi
         done
         

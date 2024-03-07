@@ -135,13 +135,6 @@ jobs:
 
     steps:
 
-      - name: Get build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: dist-artifact-common-*
-          merge-multiple: true
-          path: xsd/
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -156,6 +149,13 @@ jobs:
         uses: ./.github/actions/prepare-poetry
         with:
           python-version: 3.9
+
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dist-artifact-common-*
+          merge-multiple: true
+          path: xsd/
 
       - name: Compute env variables
         uses: ./.github/actions/compute-env-variables
