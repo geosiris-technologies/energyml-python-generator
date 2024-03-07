@@ -63,6 +63,7 @@ runs:
 
     - name: Display xsd folder
       shell: bash
+      if: always()
       run: |
         echo "::debug::listing xsd folder"
         ls -R xsd
