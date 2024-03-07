@@ -61,6 +61,14 @@ runs:
             sed -i 's/\\&quot/\&quot/g' $xsd_f;
         done
 
+    - name: Display xsd folder
+      shell: bash
+      if: always()
+      run: |
+        echo "::debug::listing xsd folder"
+        ls -R xsd
+        echo `ls -R xsd`
+
     - name: Generate
       if: ${{ inputs.download-only == 'false' }}
       shell: bash
@@ -82,7 +90,7 @@ runs:
         export ARGS_VERSION=$(if [ -n "${{ inputs.version-prodml }}" ]; then echo "$ARGS_VERSION --prodml ${{ inputs.version-prodml }}"; else echo "$ARGS_VERSION"; fi)
         echo $ARGS_VERSION
 
-        poetry run rename_pkgs $ARGS_VERSION --src gen -o generated
+        poetry run rename_pkgs $ARGS_VERSION --src gen -o energyml
 
     - name: Move only the appropriate module in src folder
       if: ${{ inputs.download-only == 'false' }}
@@ -99,16 +107,16 @@ runs:
             fi
         }
                 
-        for f in $(ls generated); do
+        for f in $(ls energyml); do
           if folder_match_pkg ${{ inputs.pkg-name }} $f;
           then echo "$f kept";
           else 
             echo "removing $f";
-            rm -rf $f;
+            rm -rf energyml/$f;
           fi
         done
         
-        mv generated src/${{ env.MODULE_FOLDER }}
+        mv energyml src/${{ env.MODULE_FOLDER }}
 
     - name: Create __init__ files
       if: ${{ inputs.download-only == 'false' }}

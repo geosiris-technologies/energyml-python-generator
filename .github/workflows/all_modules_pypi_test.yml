@@ -133,13 +133,6 @@ jobs:
 
     steps:
 
-      - name: Get build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: dist-artifact-common-*
-          merge-multiple: true
-          path: xsd/
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -154,6 +147,27 @@ jobs:
         uses: ./.github/actions/prepare-poetry
         with:
           python-version: 3.9
+
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dist-artifact-common-*
+          merge-multiple: true
+          path: xsd/
+
+      - name: Display structure of downloaded files
+        if: always()
+        run: |
+          echo "::debug::listing xsd folder"
+          ls -R xsd
+          echo `ls -R xsd`
+
+      - name: Display structure of pwd files
+        if: always()
+        run: |
+          echo "::debug::listing pwd folder"
+          ls -R .
+          echo `ls -R .`
 
       - name: Compute env variables
         uses: ./.github/actions/compute-env-variables
