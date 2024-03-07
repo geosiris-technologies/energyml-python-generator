@@ -61,6 +61,9 @@ runs:
             sed -i 's/\\&quot/\&quot/g' $xsd_f;
         done
 
+    - name: Display xsd folder
+      run: ls -R xsd/
+
     - name: Generate
       if: ${{ inputs.download-only == 'false' }}
       shell: bash

@@ -142,6 +142,9 @@ jobs:
           merge-multiple: true
           path: xsd/
 
+      - name: Display structure of downloaded files
+        run: ls -R path/to/artifacts
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
