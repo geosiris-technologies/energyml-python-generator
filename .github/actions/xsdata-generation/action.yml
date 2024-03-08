@@ -56,7 +56,7 @@ runs:
       shell: bash
       if: ${{ inputs.pkg-name == 'opc' }}
       run: |
-        for xsd_f in $(find xsd/${{ inputs.pkg-name }} | grep .xsd$ ); 
+        for xsd_f in $(find xsd/${{ inputs.pkg-name }} | grep ".*[aA]ll.*xsd" ); 
         do
             sed -i 's/\\&quot/\&quot/g' $xsd_f;
         done
@@ -73,7 +73,7 @@ runs:
       if: ${{ inputs.download-only == 'false' }}
       shell: bash
       run: |
-        export XSD_FOLDER=$(find xsd/${{ inputs.pkg-name }} | grep .xsd$ | head -n 1 | rev | cut -d'/' -f 2- | rev)
+        export XSD_FOLDER=$(find xsd/${{ inputs.pkg-name }} | grep ".*[aA]ll.*xsd" | head -n 1 | rev | cut -d'/' -f 2- | rev)
         if ${{ inputs.generation-type == 'single-package' }}; then
           poetry run xsdata generate -ss ${{ inputs.generation-type }} -p gen.${{ inputs.pkg-name }} --postponed-annotations $XSD_FOLDER;
         else
