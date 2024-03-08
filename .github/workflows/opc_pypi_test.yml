@@ -91,12 +91,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dist-artifact
-          path: src/
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -106,6 +100,12 @@ jobs:
         uses: ./.github/actions/prepare-poetry
         with:
           python-version: 3.9
+
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-artifact
+          path: src/
 
       - name: Upload to PyPI TEST
         run: |
