@@ -55,6 +55,7 @@ jobs:
           xsd-url: ${{ matrix.xsd-link }}
           pkg-name: ${{ env.PKG_NAME }}
           version-common: ${{ env.PKG_VERSION }}
+          generation-type: single-package
 
       - name: Update toml
         run: |
