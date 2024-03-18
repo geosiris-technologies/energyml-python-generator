@@ -84,7 +84,7 @@ runs:
       if: ${{ inputs.download-only == 'false' }}
       shell: bash
       run: |
-        export ARGS_VERSION=$(   [ -n "${{ inputs.version-common }}" ]     && echo " --common ${{ inputs.version-common }}")
+        export ARGS_VERSION=$(   [ -n "${{ inputs.version-common }}" ] && echo " --common ${{ inputs.version-common }}")
         export ARGS_VERSION=$(if [ -n "${{ inputs.version-resqml }}" ]; then echo "$ARGS_VERSION --resqml ${{ inputs.version-resqml }}"; else echo "$ARGS_VERSION"; fi)
         export ARGS_VERSION=$(if [ -n "${{ inputs.version-witsml }}" ]; then echo "$ARGS_VERSION --witsml ${{ inputs.version-witsml }}"; else echo "$ARGS_VERSION"; fi)
         export ARGS_VERSION=$(if [ -n "${{ inputs.version-prodml }}" ]; then echo "$ARGS_VERSION --prodml ${{ inputs.version-prodml }}"; else echo "$ARGS_VERSION"; fi)
