@@ -9,7 +9,7 @@ on:
     types: [created]
 
 env:
-  PKG_NAME: commonv2
+  PKG_NAME: common
 
 jobs:
 
@@ -56,6 +56,7 @@ jobs:
           pkg-name: ${{ env.PKG_NAME }}
           version-common: ${{ env.PKG_VERSION }}
           generation-type: single-package
+          final-pkg-name: commonv2
 
       - name: Update toml
         run: |

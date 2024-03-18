@@ -16,6 +16,10 @@ inputs:
   pkg-name:
     description: 'name of the package to generate (common|resqml|witsml|prodml|opc)'
     required: true
+  
+  final-pkg-name:
+    description: 'name of the package to generate (commonv2|resqmlv2|witsmlv2|prodmlv2|opc). Only used for "generation-type" = "single-package"'
+    default: ${{ inputs.pkg-name }}
 
   version-common:
     description: 'version of the common package'
@@ -75,7 +79,7 @@ runs:
       run: |
         export XSD_FOLDER=$(find xsd/${{ inputs.pkg-name }} | grep ".*[aA]ll.*xsd" | head -n 1 | rev | cut -d'/' -f 2- | rev)
         if ${{ inputs.generation-type == 'single-package' }}; then
-          poetry run xsdata generate -fs all -ss ${{ inputs.generation-type }} -p gen.${{ inputs.pkg-name }} --postponed-annotations $XSD_FOLDER;
+          poetry run xsdata generate -fs all -ss ${{ inputs.generation-type }} -p gen.${{ inputs.final-pkg-name }} --postponed-annotations $XSD_FOLDER;
         else
           poetry run xsdata generate -fs all -ss ${{ inputs.generation-type }} -p gen --postponed-annotations $XSD_FOLDER;
         fi
