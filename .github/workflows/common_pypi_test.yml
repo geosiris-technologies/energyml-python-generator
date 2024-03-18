@@ -54,6 +54,7 @@ jobs:
           pkg-name: ${{ env.PKG_NAME }}
           version-common: ${{ env.PKG_VERSION }}
           generation-type: single-package
+          final-pkg-name: commonv2
 
       - name: Update toml
         run: |
