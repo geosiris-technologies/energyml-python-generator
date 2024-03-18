@@ -7,7 +7,7 @@ name: Energyml Package common pypi-test
 on: [pull_request]
 
 env:
-  PKG_NAME: common
+  PKG_NAME: commonv2
 
 jobs:
 

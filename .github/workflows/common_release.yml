@@ -9,7 +9,7 @@ on:
     types: [created]
 
 env:
-  PKG_NAME: common
+  PKG_NAME: commonv2
 
 jobs:
 
